@@ -50,6 +50,21 @@ Or install it yourself as:
 $ gem install barley
 ```
 
+## Defining the serializer
+
+Barley uses the model name to find the serializer class. For example, if you have a `User` model, Barley will look for a `UserSerializer` class.
+
+You can also define the serializer class with the `serializer` macro.
+
+```ruby
+# /app/models/user.rb
+class User < ApplicationRecord
+  include Barley::Serializable
+  
+  serializer UserSerializer
+end
+```
+
 ## DSL
 
 ### Attributes
@@ -92,6 +107,7 @@ You can also define a custom association with a block. You will have a `object` 
   end
 ```
 
+##### Custom serializer and caching
 You can define a custom serializer for the association with the `serializer` option, and / or caching options with the `cache` option.
 
 ```ruby
@@ -113,6 +129,7 @@ end
 
 ```
 end
+
 #### One-to-many
 You can define a one-to-many association with the `many` macro.
 
@@ -128,6 +145,13 @@ You can also define a custom association with a block. You will have a `object` 
   end
 ```
 
+##### Custom serializer and caching
+
+You can define a custom serializer for the association with the `serializer` option, and / or caching options with the `cache` option.
+
+```ruby
+  many :posts, serializer: CustomPostSerializer, cache: { expires_in: 1.hour }
+```
 
 ## Serialization options
 You can pass a hash of options to the `as_json` method.
