@@ -1,5 +1,7 @@
-# Barley
-Short description and motivation.
+![Barley loqo](./img/barley.png)
+
+Barley is a dead simple, fast, and efficient ActiveModel JSON serializer.
+Cerealize your ActiveModel objects into flat JSON objects with a dead simple DSL. Our daily bread is to make your API faster.
 
 ## Usage
 How to use my plugin.
