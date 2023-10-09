@@ -1,0 +1,12 @@
+module Barley
+  class Configuration
+    @cache_store : ActiveSupport::Cache::MemoryStore
+
+    attr_accessor cache_store: untyped
+
+    private
+
+    def default_cache_store : -> ActiveSupport::Cache::MemoryStore
+    @cache_store : untyped
+  end
+end

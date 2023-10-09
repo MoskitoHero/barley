@@ -1,0 +1,7 @@
+module Barley
+  VERSION: String
+
+  @config: Barley::Configuration
+
+  def self.configure: -> untyped
+end

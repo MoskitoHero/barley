@@ -1,0 +1,9 @@
+module Barley
+  class Cache
+    @cache_store: ActiveSupport::Cache::MemoryStore | ActiveSupport::Cache::RedisCacheStore
+
+    def delete : (Symbol key) -> untyped
+
+    def fetch : (Symbol key, Hash[Symbol, untyped] options)-> untyped
+  end
+end

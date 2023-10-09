@@ -1,0 +1,6 @@
+module Barley
+  module Serializable
+    def serializer: (ActiveRecord::Base klass, ?cache: bool | Hash[Symbol, ActiveSupport::Duration]) -> untyped
+    def as_json: -> Hash[Symbol, untyped]
+  end
+end
