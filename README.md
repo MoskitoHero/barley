@@ -153,6 +153,23 @@ You can define a custom serializer for the association with the `serializer` opt
   many :posts, serializer: CustomPostSerializer, cache: { expires_in: 1.hour }
 ```
 
+## Generators
+You have two generators available. One to generate the serializer class:
+
+```shell
+rails generate barley:serializer User 
+# or
+rails generate barley:serializer User name:CustomUserSerializer
+```
+
+And one to generate both the serializer class and add the module to the model:
+
+```shell
+rails generate barley:serializable User
+# or
+rails generate barley:serializable User name:CustomUserSerializer
+```
+
 ## Serialization options
 You can pass a hash of options to the `as_json` method.
 
@@ -172,7 +189,7 @@ Barley supports caching out of the box. Just pass `cache: true` to the `serializ
 ```ruby
 # /app/models/user.rb
 # ...
-serializer UserCerealizer, cache: true
+serializer UserSerializer, cache: true
 ```
 
 Or you can pass a hash of options to the `serializer` macro.
@@ -180,10 +197,23 @@ Or you can pass a hash of options to the `serializer` macro.
 ```ruby
 # /app/models/user.rb
 # ...
-serializer UserCerealizer, cache: { expires_in: 1.hour }
+serializer UserSerializer, cache: { expires_in: 1.hour }
 ```
 
-## Fun mode 🤡
+### Caching options
+Barley uses the MemoryStore by default. You can change the cache store with the `cache_store` option in an initializer.
+
+```ruby
+# /config/initializers/barley.rb
+Barley.configure do |config|
+  config.cache_store = ActiveSupport::Cache::RedisCacheStore.new
+  # config.cache_store = ActiveSupport::Cache::MemoryStore.new
+  # config.cache_store = ActiveSupport::Cache::FileStore.new
+  # config.cache_store = Rails.cache
+end
+```
+
+## Breakfast mode 🤡
 You can replace all occurrences of `Serializer` with `Cerealizer` in your codebase. Just for fun. And for free.
 
 ```ruby
@@ -203,14 +233,18 @@ class UserCerealizer < Barley::Cerealizer
 end
 ```
 
+```shell
+rails generate barley:cerealizer User
+# etc.
+```
+
 Ah ah ah. This is so funny.
 
+## JSON:API
+No. Not yet. Maybe never. We don't know. We don't care. We don't use it. We don't like it. We don't want to. We don't have time. We don't have money. We don't have a life. We don't have a girlfriend. We don't have a boyfriend. We don't have a dog. We don't have a cat. We are generating this readme with Copilot.
+
 ## Benchmarks
-
 This gem is blazing fast and efficient. It is 2 to 3 times faster than [ActiveModel::Serializer](https://github.com/rails-api/active_model_serializers) and twice as fast as [FastJsonapi](https://github.com/Netflix/fast_jsonapi).
-
-## Contributing
-Contribution directions go here.
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
