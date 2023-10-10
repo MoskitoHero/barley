@@ -1,0 +1,22 @@
+Description:
+    Explain the generator
+
+Example:
+    bin/rails generate serializable Thing
+
+    This will create:
+      app/serializers/thing_serializer.rb
+        spec/serializers/thing_serializer_spec.rb # if rspec is installed
+        test/serializers/thing_serializer_test.rb # if minitest is installed
+    And update:
+      app/models/thing.rb
+
+Example:
+    bin/rails generate serializable Thing --name=CustomThingSerializer
+
+    This will create:
+      app/serializers/custom_thing_serializer.rb
+        spec/serializers/custom_thing_serializer_spec.rb # if rspec is installed
+        test/serializers/custom_thing_serializer_test.rb # if minitest is installed
+    And update:
+        app/models/thing.rb

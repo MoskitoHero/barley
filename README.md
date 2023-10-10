@@ -213,7 +213,7 @@ Barley.configure do |config|
 end
 ```
 
-## Breakfast mode 🤡
+## Breakfast mode 🤡 (coming soon)
 You can replace all occurrences of `Serializer` with `Cerealizer` in your codebase. Just for fun. And for free.
 
 ```ruby

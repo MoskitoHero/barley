@@ -1,13 +1,20 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "generators/serializer/serializable_generator"
+require "generators/serializable/serializable_generator"
 require "minitest/mock"
 
 class SerializableGeneratorTest < Rails::Generators::TestCase
   tests SerializableGenerator
   destination Rails.root.join("tmp/generators")
   setup :prepare_destination
+
+  setup do
+    model_path = File.join(destination_root, "app/models")
+    FileUtils.mkdir_p(model_path)
+    file_name = File.join(model_path, "post.rb")
+    File.write(file_name, "class Post < ApplicationRecord\nend")
+  end
 
   test "should add a serializer file" do
     run_generator %w[post]
@@ -62,11 +69,6 @@ class SerializableGeneratorTest < Rails::Generators::TestCase
   end
 
   test "should update the model file" do
-    model_path = File.join(destination_root, "app/models")
-    FileUtils.mkdir_p(model_path)
-    file_name = File.join(model_path, "post.rb")
-    File.write(file_name, "class Post < ApplicationRecord\nend")
-
     run_generator %w[post]
     assert_file "app/models/post.rb", /include Barley::Serializable/
   end
