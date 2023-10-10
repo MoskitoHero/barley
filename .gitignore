@@ -9,6 +9,9 @@
 /test/version_tmp/
 /tmp/
 .idea/
+/test/dummy/tmp/
+/test/dummy/log/
+/test/dummy/storage/
 
 # Used by dotenv library to load environment variables.
 .env

@@ -159,7 +159,7 @@ You have two generators available. One to generate the serializer class:
 ```shell
 rails generate barley:serializer User 
 # or
-rails generate barley:serializer User name:CustomUserSerializer
+rails generate barley:serializer User --name=CustomUserSerializer
 ```
 
 And one to generate both the serializer class and add the module to the model:
@@ -167,7 +167,7 @@ And one to generate both the serializer class and add the module to the model:
 ```shell
 rails generate barley:serializable User
 # or
-rails generate barley:serializable User name:CustomUserSerializer
+rails generate barley:serializable User --name=CustomUserSerializer
 ```
 
 ## Serialization options
