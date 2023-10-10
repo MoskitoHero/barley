@@ -2,7 +2,9 @@
 
 Barley is a dead simple, fast, and efficient ActiveModel JSON serializer.
 
-Cerealize your ActiveModel objects into flat JSON objects with a dead simple DSL. Our daily bread is to make your API faster.
+Cerealize your ActiveModel objects into flat JSON objects with a dead simple DSL. Our daily bread is to make your API faster. 
+
+You don't believe us? Check out the [benchmarks](#benchmarks). 😎
 
 ## Usage
 Add the `Barley::Serializable` module to your ActiveModel object.
@@ -214,7 +216,7 @@ end
 ```
 
 ## Breakfast mode 🤡 (coming soon)
-You can replace all occurrences of `Serializer` with `Cerealizer` in your codebase. Just for fun. And for free.
+You will soon be able to replace all occurrences of `Serializer` with `Cerealizer` in your codebase. Just for fun. And for free.
 
 ```ruby
 # /app/models/user.rb
