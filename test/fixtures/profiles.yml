@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: John Doe
+  age: 23
+  birthdate: 2000-10-09
+
+two:
+  name: MyString
+  age: 25
+  birthdate: 1998-10-09

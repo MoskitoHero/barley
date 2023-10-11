@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UserSerializer < Barley::Serializer
-  class UserProfileSerializer < Barley::Serializer
+  class ProfileSerializer < Barley::Serializer
     attributes :name, :age
     attribute :birthday do
       object.birthdate.strftime("%m-%d")
@@ -19,5 +19,5 @@ class UserSerializer < Barley::Serializer
   attributes :id, :email, :created_at, :updated_at
 
   many :groups, serializer: GroupSerializer, cache: true
-  one :profile, serializer: UserProfileSerializer
+  one :profile, serializer: ProfileSerializer
 end

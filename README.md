@@ -92,6 +92,12 @@ You can also define a custom attribute with a block. You will have a `object` va
   end
 ```
 
+You can also set a custom key name for the attribute with the `key_name` option.
+
+```ruby
+  attribute :updated_at, key: :last_change
+```
+
 ### Associations
 
 #### One-to-one
@@ -99,14 +105,6 @@ You can define a one-to-one association with the `one` macro.
 
 ```ruby
   one :group
-```
-
-You can also define a custom association with a block. You will have a `object` variable available in the block. It is the object you are serializing.
-
-```ruby
-  one :group do
-    object.group.name
-  end
 ```
 
 ##### Custom serializer and caching
@@ -128,9 +126,15 @@ class UserSerializer < Barley::Serializer
         attributes :id, :name
     end
 end
-
 ```
-end
+
+##### Key name
+
+You can also pass a key name for the association with the `key_name` option.
+
+```ruby
+  one :group, key_name: :team
+```
 
 #### One-to-many
 You can define a one-to-many association with the `many` macro.
@@ -139,20 +143,38 @@ You can define a one-to-many association with the `many` macro.
   many :posts
 ```
 
-You can also define a custom association with a block. You will have a `object` variable available in the block. It is the object you are serializing.
-
-```ruby
-  many :posts do
-    object.posts.map(&:title)
-  end
-```
-
 ##### Custom serializer and caching
 
 You can define a custom serializer for the association with the `serializer` option, and / or caching options with the `cache` option.
 
 ```ruby
   many :posts, serializer: CustomPostSerializer, cache: { expires_in: 1.hour }
+```
+
+##### Key name
+You can also pass a key name for the association with the `key_name` option.
+
+```ruby
+  many :posts, key_name: :articles
+```
+
+### Associations with blocks
+Feel like using a block to define your associations? You can do that too.
+
+```ruby
+  one :group do
+    attributes :id, :name
+  end
+```
+
+```ruby
+  many :posts do
+    attributes :id, :title, :body
+  
+    one :author do
+      attributes :name, :email
+    end
+  end
 ```
 
 ## Generators
@@ -209,9 +231,6 @@ Barley uses the MemoryStore by default. You can change the cache store with the 
 # /config/initializers/barley.rb
 Barley.configure do |config|
   config.cache_store = ActiveSupport::Cache::RedisCacheStore.new
-  # config.cache_store = ActiveSupport::Cache::MemoryStore.new
-  # config.cache_store = ActiveSupport::Cache::FileStore.new
-  # config.cache_store = Rails.cache
 end
 ```
 
@@ -241,6 +260,8 @@ rails generate barley:cerealizer User
 ```
 
 Ah ah ah. This is so funny.
+
+*Note: we are thinking about adding a `Surrealizer` class for the most advanced users. Stay tuned.*
 
 ## JSON:API
 No. Not yet. Maybe never. We don't know. We don't care. We don't use it. We don't like it. We don't want to. We don't have time. We don't have money. We don't have a life. We don't have a girlfriend. We don't have a boyfriend. We don't have a dog. We don't have a cat. We are generating this readme with Copilot.
