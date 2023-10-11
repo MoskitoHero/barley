@@ -4,6 +4,69 @@ module Barley
   class Serializer
     attr_accessor :object
 
+    class << self
+      def attributes(*keys)
+        keys.each do |key|
+          define_method(key) do
+            object.send(key)
+          end
+          set_class_iv(:@defined_attributes, key)
+        end
+      end
+
+      def attribute(key, key_name: nil, &block)
+        key_name ||= key
+        if block
+          define_method(key_name) do
+            instance_eval(&block)
+          end
+        else
+          define_method(key_name) do
+            object.send(key)
+          end
+        end
+        set_class_iv(:@defined_attributes, key_name)
+      end
+
+      def one(key, key_name: nil, serializer: nil, cache: false, &block)
+        key_name ||= key
+        if block
+          serializer = Class.new(Barley::Serializer) do
+            instance_eval(&block)
+          end
+        end
+        define_method(key_name) do
+          element = object.send(key)
+          return {} if element.nil?
+
+          el_serializer = serializer || element.serializer.class
+          el_serializer.new(element, cache: cache).as_json
+        end
+        set_class_iv(:@defined_attributes, key_name)
+      end
+
+      def many(key, key_name: nil, serializer: nil, cache: false, &block)
+        key_name ||= key
+        if block
+          serializer = Class.new(Barley::Serializer) do
+            instance_eval(&block)
+          end
+        end
+        define_method(key_name) do
+          elements = object.send(key)
+          return [] if elements.empty?
+
+          el_serializer = serializer || elements.first.serializer.class
+          elements.map { |element| el_serializer.new(element, cache: cache).as_json }.reject(&:blank?)
+        end
+        set_class_iv(:@defined_attributes, key_name)
+      end
+
+      def set_class_iv(iv, key)
+        instance_variable_defined?(iv) ? instance_variable_get(iv) << key : instance_variable_set(iv, [key])
+      end
+    end
+
     # @example with cache
     #   Barley::Serializer.new(object, cache: true)
     # @example with cache and expires_in
@@ -15,67 +78,6 @@ module Barley
       else
         [cache, nil]
       end
-    end
-
-    def self.attributes(*keys)
-      keys.each do |key|
-        define_method(key) do
-          object.send(key)
-        end
-        set_class_iv(:@defined_attributes, key)
-      end
-    end
-
-    def self.attribute(key, key_name: nil, &block)
-      key_name ||= key
-      if block
-        define_method(key_name) do
-          instance_eval(&block)
-        end
-      else
-        define_method(key_name) do
-          object.send(key)
-        end
-      end
-      set_class_iv(:@defined_attributes, key_name)
-    end
-
-    def self.set_class_iv(iv, key)
-      instance_variable_defined?(iv) ? instance_variable_get(iv) << key : instance_variable_set(iv, [key])
-    end
-
-    def self.one(key, key_name: nil, serializer: nil, cache: false, &block)
-      key_name ||= key
-      if block
-        serializer = Class.new(Barley::Serializer) do
-          instance_eval(&block)
-        end
-      end
-      define_method(key_name) do
-        element = object.send(key)
-        return {} if element.nil?
-
-        el_serializer = serializer || element.serializer.class
-        el_serializer.new(element, cache: cache).as_json
-      end
-      set_class_iv(:@defined_attributes, key_name)
-    end
-
-    def self.many(key, key_name: nil, serializer: nil, cache: false, &block)
-      key_name ||= key
-      if block
-        serializer = Class.new(Barley::Serializer) do
-          instance_eval(&block)
-        end
-      end
-      define_method(key_name) do
-        elements = object.send(key)
-        return [] if elements.empty?
-
-        el_serializer = serializer || elements.first.serializer.class
-        elements.map { |element| el_serializer.new(element, cache: cache).as_json }.reject(&:blank?)
-      end
-      set_class_iv(:@defined_attributes, key_name)
     end
 
     def as_json
