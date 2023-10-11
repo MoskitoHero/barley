@@ -271,7 +271,7 @@ This gem is blazing fast and efficient. It is 2 to 3 times faster than [ActiveMo
 
 With caching enabled, it is just mind-blowing. We think. *Disclaimer: we do not serialize to the JSON:API standard, so that might be the reason why we are so fast.*
 
-This is the result we get with the benchmark script used in the AMS repo on an Apple Silicon M1Pro processor. We will push this benchmark as soon as possible so you can see for yourself.
+This is the result we get with the benchmark script used in the AMS repo on an Apple Silicon M1Pro processor. [Check it out for yourself here](https://github.com/MoskitoHero/active_model_serializers/tree/benchmarks).
 
 ```shell
 bundle exec ruby benchmark.rb
