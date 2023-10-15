@@ -2,7 +2,7 @@
 
 Barley is a dead simple, fast, and efficient ActiveModel JSON serializer.
 
-Cerealize your ActiveModel objects into flat JSON objects with a dead simple DSL. Our daily bread is to make your API faster. 
+Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching baked in. Our daily bread is to make your API faster. 
 
 You don't believe us? Check out the [benchmarks](#benchmarks). 😎
 
@@ -21,10 +21,19 @@ Then define your attributes and associations in a serializer class.
 ```ruby
 # /app/serializers/user_serializer.rb
 class UserSerializer < Barley::Serializer
-  attributes :id, :name, :email, :created_at, :updated_at
+  attributes :id, :name,
+  attribute :email # single attribute
 
-  many :posts
-  one :group
+  many :posts # relations
+  one :group, serializer: CustomGroupSerializer # custom serializer
+  many :related_users, key: :friends, cache: true # custom key, and caching
+  one :profile, cache: { expires_in: 1.day } do # cache definition, and block (on associations) for nested, on-the-fly serializer
+    attributes :avatar, :social_url
+    attribute :badges do
+      object.badges.map(&:display_name) # use object in a block to return custom code
+    end
+  end
+    
 end
 ```
 
