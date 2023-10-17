@@ -273,7 +273,7 @@ Ah ah ah. This is so funny.
 *Note: we are thinking about adding a `Surrealizer` class for the most advanced users. Stay tuned.*
 
 ## JSON:API
-No. Not yet. Maybe never. We don't know. We don't care. We don't use it. We don't like it. We don't want to. We don't have time. We don't have money. We don't have a life. We don't have a girlfriend. We don't have a boyfriend. We don't have a dog. We don't have a cat. We are generating this readme with Copilot.
+Barley does not serialize to the JSON:API standard. We prefer to keep it simple and fast.
 
 ## Benchmarks
 This gem is blazing fast and efficient. It is 2 to 3 times faster than [ActiveModel::Serializer](https://github.com/rails-api/active_model_serializers) and twice as fast as [FastJsonapi](https://github.com/Netflix/fast_jsonapi). Memory object allocation is also much lower.
@@ -360,3 +360,8 @@ ams               :    1299674 allocated - 28.20x more
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Credits
+Barley is brought to you by the developer team from [StockPro](https://stock-pro.fr/).
+
+[![Barley is brought to you by StockPro](img/stockpro.png)](https://stock-pro.fr/)
