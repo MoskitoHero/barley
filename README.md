@@ -362,6 +362,6 @@ ams               :    1299674 allocated - 28.20x more
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
 ## Credits
-Barley is brought to you by the developer team from [StockPro](https://stock-pro.fr/).
+Barley is brought to you by the developer team from [StockPro](https://www.stock-pro.fr/).
 
-[![Barley is brought to you by StockPro](img/stockpro.png)](https://stock-pro.fr/)
+[![Barley is brought to you by StockPro](img/stockpro.png)](https://www.stock-pro.fr/)
