@@ -33,9 +33,9 @@ module Barley
     included do
       serializer "#{self}Serializer".constantize
 
-      def as_json(serializer: nil, cache: false)
+      def as_json(serializer: nil, cache: false, root: false)
         serializer ||= self.serializer.class
-        serializer.new(self, cache: cache).as_json
+        serializer.new(self, cache: cache, root: root).serializable_hash
       end
     end
   end

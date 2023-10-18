@@ -1,19 +1,114 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "minitest/mock"
+
+class DummyModelSerializer < Barley::Serializer
+end
+
+class OtherDummyModelSerializer < Barley::Serializer
+end
 
 module Barley
   class SerializableTest < ActiveSupport::TestCase
     def setup
-      # Do nothing
+      @model = DummyModel
     end
 
-    def teardown
-      # Do nothing
+    test "it provides a default serializer named after the model name" do
+      assert_instance_of(DummyModelSerializer, @model.new.serializer)
     end
 
-    def test
-      skip "Not implemented"
+    test "it uses the serializer defined in the model" do
+      model = OtherDummyModel.new
+      assert_instance_of(CustomOtherDummyModelSerializer, model.serializer)
+    end
+
+    test "as_json calls the serializer" do
+      model = @model.new
+      mock = Minitest::Mock.new
+      serializer_mock = Minitest::Mock.new
+      mock.expect(:class, mock)
+      mock.expect(:new, serializer_mock, [model], cache: false, root: false)
+      serializer_mock.expect(:serializable_hash, {}, [])
+
+      model.stub(:serializer, mock) do
+        model.as_json
+      end
+
+      mock.verify
+      serializer_mock.verify
+    end
+
+    test "as_json with a custom serializer calls the serializer" do
+      model = @model.new
+      mock = Minitest::Mock.new
+      mock.expect(:serializable_hash, {}, [])
+      OtherDummyModelSerializer.stub(:new, mock) do
+        model.as_json(serializer: OtherDummyModelSerializer)
+      end
+      mock.verify
+    end
+
+    test "as_json with cache calls the serializer with cache" do
+      model = @model.new
+      mock = Minitest::Mock.new
+      serializer_mock = Minitest::Mock.new
+      mock.expect(:class, mock)
+      mock.expect(:new, serializer_mock, [model], cache: true, root: false)
+      serializer_mock.expect(:serializable_hash, {}, [])
+
+      model.stub(:serializer, mock) do
+        model.as_json(cache: true)
+      end
+
+      mock.verify
+      serializer_mock.verify
+    end
+
+    test "as_json with cache and expires_in calls the serializer with cache and expires_in" do
+      model = @model.new
+      mock = Minitest::Mock.new
+      serializer_mock = Minitest::Mock.new
+      mock.expect(:class, mock)
+      mock.expect(:new, serializer_mock, [model], cache: {expires_in: 1.hour}, root: false)
+      serializer_mock.expect(:serializable_hash, {}, [])
+
+      model.stub(:serializer, mock) do
+        model.as_json(cache: {expires_in: 1.hour})
+      end
+
+      mock.verify
+      serializer_mock.verify
+    end
+
+    test "as_json with root calls the serializer with root" do
+      model = @model.new
+      mock = Minitest::Mock.new
+      serializer_mock = Minitest::Mock.new
+      mock.expect(:class, mock)
+      mock.expect(:new, serializer_mock, [model], cache: false, root: true)
+      serializer_mock.expect(:serializable_hash, {}, [])
+
+      model.stub(:serializer, mock) do
+        model.as_json(root: true)
+      end
+
+      mock.verify
+      serializer_mock.verify
     end
   end
+end
+
+class CustomOtherDummyModelSerializer < Barley::Serializer
+end
+
+class DummyModel
+  include Barley::Serializable
+end
+
+class OtherDummyModel
+  include Barley::Serializable
+
+  serializer CustomOtherDummyModelSerializer
 end

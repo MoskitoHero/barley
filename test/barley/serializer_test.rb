@@ -18,21 +18,21 @@ module Barley
         groups: @user.groups.map { |g| g.as_json(serializer: UserSerializer::GroupSerializer) },
         profile: @user.profile.as_json(serializer: UserSerializer::ProfileSerializer)
       }
-      assert_equal(expected, serializer.as_json)
+      assert_equal(expected, serializer.serializable_hash)
     end
 
     test "it serializes a model with a custom serializer" do
       serializer = Class.new(Barley::Serializer) do
         attributes :id, :email
       end
-      assert_equal({id: @user.id, email: @user.email}, serializer.new(@user).as_json)
+      assert_equal({id: @user.id, email: @user.email}, serializer.new(@user).serializable_hash)
     end
 
     test "it serializes a model with a custom serializer and cache" do
       serializer = Class.new(Barley::Serializer) do
         attributes :id, :email
       end
-      assert_equal({id: @user.id, email: @user.email}, serializer.new(@user, cache: true).as_json)
+      assert_equal({id: @user.id, email: @user.email}, serializer.new(@user, cache: true).serializable_hash)
     end
 
     test "it serializes with a custom attribute" do
@@ -56,7 +56,7 @@ module Barley
         username: @user.email.tr("@", "_"),
         creation_date: @user.created_at
       }
-      assert_equal(expected, serializer.new(@user).as_json)
+      assert_equal(expected, serializer.new(@user).serializable_hash)
     end
 
     test "it serializes with a block on associations" do
@@ -81,7 +81,7 @@ module Barley
         groups: @user.groups.map { |g| {id: g.id, name: g.name} },
         profile: {id: @user.profile.id, info: "#{@user.profile.name} (#{@user.profile.age})"}
       }
-      assert_equal(expected, serializer.new(@user).as_json)
+      assert_equal(expected, serializer.new(@user).serializable_hash)
     end
 
     test "it serializes with nested blocks on associations" do
@@ -107,7 +107,7 @@ module Barley
           }
         end
       }
-      assert_equal(expected, serializer.new(@user).as_json)
+      assert_equal(expected, serializer.new(@user).serializable_hash)
     end
   end
 end

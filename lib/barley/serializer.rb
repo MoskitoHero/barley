@@ -40,7 +40,7 @@ module Barley
           return {} if element.nil?
 
           el_serializer = serializer || element.serializer.class
-          el_serializer.new(element, cache: cache).as_json
+          el_serializer.new(element, cache: cache).serializable_hash
         end
         set_class_iv(:@defined_attributes, key_name)
       end
@@ -57,7 +57,7 @@ module Barley
           return [] if elements.empty?
 
           el_serializer = serializer || elements.first.serializer.class
-          elements.map { |element| el_serializer.new(element, cache: cache).as_json }.reject(&:blank?)
+          elements.map { |element| el_serializer.new(element, cache: cache).serializable_hash }.reject(&:blank?)
         end
         set_class_iv(:@defined_attributes, key_name)
       end
@@ -71,8 +71,9 @@ module Barley
     #   Barley::Serializer.new(object, cache: true)
     # @example with cache and expires_in
     #   Barley::Serializer.new(object, cache: {expires_in: 1.hour})
-    def initialize(object, cache: false)
+    def initialize(object, cache: false, root: false)
       @object = object
+      @root = root
       @cache, @expires_in = if cache.is_a?(Hash)
         [true, cache[:expires_in]]
       else
@@ -80,14 +81,13 @@ module Barley
       end
     end
 
-    def as_json
+    def serializable_hash
       if @cache
-        cache_key = cache_base_key
-        Barley::Cache.fetch(cache_key, expires_in: @expires_in) do
-          _as_json
+        Barley::Cache.fetch(cache_base_key, expires_in: @expires_in) do
+          _serializable_hash
         end
       else
-        _as_json
+        _serializable_hash
       end
     end
 
@@ -98,21 +98,29 @@ module Barley
     private
 
     def cache_base_key
-      "#{object.class.name&.underscore}/#{object.id}/#{object.updated_at.to_i}/as_json/"
+      if object.updated_at.present?
+        "#{object.class.name&.underscore}/#{object.id}/#{object.updated_at&.to_i}/barley_cache/"
+      else
+        "#{object.class.name&.underscore}/#{object.id}/barley_cache/"
+      end
     end
 
     def defined_attributes
       self.class.instance_variable_get(:@defined_attributes)
     end
 
-    def _as_json
+    def _serializable_hash
       hash = {}
 
       defined_attributes.each do |key|
         hash[key] = send(key)
       end
 
-      hash
+      @root ? {root_key => hash} : hash
+    end
+
+    def root_key
+      object.class.name.underscore.to_sym
     end
   end
 end
