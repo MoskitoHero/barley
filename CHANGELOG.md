@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.4.0 (2023-10-19)
+### ✨New features
+- Added type-checking to the `attributes` and `attribute` methods. Now you can do:
+  ```ruby
+  attributes id: Types::Strict::Integer, name: Types::Strict::String
+  attribute :created_at, type: Types::Strict::Time
+  ```
+  and the serializer will raise an error if the object's attribute is not of the specified type. See the README for more details.
+### 📝 Documentation
+- Updated the README to include the new type-checking feature.
+- Added YARD documentation. API documentation is available [here](https://rubydoc.info/github/MoskitoHero/barley/main)
+
+
 ## v0.3.0 (2023-10-18)
 ### ✨New features
 - Expanded Barley::Serializer and Barley::Serializable to handle optional root serialization.
