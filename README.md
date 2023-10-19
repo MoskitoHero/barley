@@ -6,6 +6,9 @@ Cerealize your ActiveModel objects into flat hashes with a dead simple, yet vers
 
 You don't believe us? Check out the [benchmarks](#benchmarks). 😎
 
+## API documentation
+[Check out the API documentation here](https://rubydoc.info/github/MoskitoHero/barley/main).
+
 ## Usage
 Add the `Barley::Serializable` module to your ActiveModel object.
 
@@ -21,8 +24,9 @@ Then define your attributes and associations in a serializer class.
 ```ruby
 # /app/serializers/user_serializer.rb
 class UserSerializer < Barley::Serializer
-  attributes :id, :name,
+  attributes id: Types::Strict::Integer, :name # multiple attributes, optional type checking with dry-types
   attribute :email # single attribute
+  attribute :value, type: Types::Coercible::Integer # optional type checking with dry-types
 
   many :posts # relations
   one :group, serializer: CustomGroupSerializer # custom serializer
@@ -242,6 +246,27 @@ Barley.configure do |config|
   config.cache_store = ActiveSupport::Cache::RedisCacheStore.new
 end
 ```
+
+## Type checking
+Barley can check the type of the object you are serializing with the [dry-types](https://dry-rb.org/gems/dry-types/main/) gem. 
+
+It will raise an error if the object is not of the expected type, or coerce it to the correct type and perform constraints checks.
+
+```ruby
+module Types
+  include Dry.Types()
+end
+
+class UserSerializer < Barley::Serializer
+  attributes id: Types::Strict::Integer, name: Types::Strict::String, email: Types::Strict::String.constrained(format: URI::MailTo::EMAIL_REGEXP)
+
+  attribute :role, type: Types::Coercible::String do
+    object.role.integer_or_string_coercible_value
+  end
+end
+```
+
+Check out [dry-types](https://dry-rb.org/gems/dry-types/main/) for all options and available types.
 
 ## Breakfast mode 🤡 (coming soon)
 You will soon be able to replace all occurrences of `Serializer` with `Cerealizer` in your codebase. Just for fun. And for free.
