@@ -1,33 +1,128 @@
 # frozen_string_literal: true
 
+require "dry-types"
+
+module Types
+  include Dry.Types()
+end
+
 module Barley
   class Serializer
     attr_accessor :object
 
     class << self
+      # Defines attributes for the serializer
+      #
+      # Accepts either a list of symbols or a hash of symbols and Dry::Types, or a mix of both
+      #
+      # @example only symbols
+      #   attributes :id, :name, :email
+      #   # => {id: 1234, name: "John Doe", email: "john.doe@example"}
+      #
+      # @example with types
+      #   attributes id: Types::Strict::Integer, name: Types::Strict::String, email: Types::Strict::String
+      #   # => {id: 1234, name: "John Doe", email: "john.doe@example"}
+      #
+      # @example with types and symbols
+      #   attributes :id, name: Types::Strict::String, email: Types::Strict::String
+      #   # => {id: 1234, name: "John Doe", email: "john.doe@example"}
+      #
+      # @see #attribute
+      #
+      # @param keys [Hash<Symbol, Dry::Types>, Array<Symbol>] mix of symbols and hashes of symbols and Dry::Types
       def attributes(*keys)
-        keys.each do |key|
-          define_method(key) do
-            object.send(key)
+        if keys.last.is_a?(Hash)
+          keys.pop.each do |key, type|
+            attribute(key, type: type)
           end
-          set_class_iv(:@defined_attributes, key)
+        end
+        keys.each do |key|
+          if key.is_a?(Hash)
+            attribute(key.keys.first, type: key.values.first)
+          else
+            attribute(key)
+          end
         end
       end
 
-      def attribute(key, key_name: nil, &block)
+      # Defines a single attribute for the serializer
+      #
+      # Type checking is done with Dry::Types. If a type is not provided, the value is returned as is.
+      # Dry::Types can be used to coerce the value to the desired type and to check constraints.
+      #
+      # @see https://dry-rb.org/gems/dry-types/main/
+      #
+      # @raise [Dry::Types::ConstraintError] if the type does not match
+      #
+      # @example simple attribute
+      #   attribute :id
+      #   # => {id: 1234}
+      #
+      # @example attribute with a different key name
+      #   attribute :name, key_name: :full_name
+      #   # => {full_name: "John Doe"}
+      #
+      # @example attribute with a type
+      #   attribute :email, type: Types::Strict::String
+      #   # => {email: "john.doe@example"}
+      #
+      # @example attribute with a type and a block
+      #   attribute :email, type: Types::Strict::String do
+      #     object.email.upcase
+      #   end
+      #   # => {email: "JOHN.DOE@EXAMPLE"}
+      #
+      # @param key [Symbol] the attribute name
+      # @param key_name [Symbol] the key name in the hash
+      # @param type [Dry::Types] the type to use, or coerce the value to
+      # @param block [Proc] a block to use to compute the value
+      def attribute(key, key_name: nil, type: nil, &block)
         key_name ||= key
         if block
           define_method(key_name) do
-            instance_eval(&block)
+            type.nil? ? instance_eval(&block) : type[instance_eval(&block)]
           end
         else
           define_method(key_name) do
-            object.send(key)
+            type.nil? ? object.send(key) : type[object.send(key)]
           end
         end
         set_class_iv(:@defined_attributes, key_name)
       end
 
+      # Defines a single association for the serializer
+      #
+      # @example using the default serializer of the associated model
+      #   one :group
+      #   # => {group: {id: 1234, name: "Group 1"}}
+      #
+      # @example using a custom serializer
+      #   one :group, serializer: MyCustomGroupSerializer
+      #   # => {group: {id: 1234, name: "Group 1"}}
+      #
+      # @example using a block with an inline serializer definition
+      #   one :group do
+      #     attributes :id, :name
+      #   end
+      #   # => {group: {id: 1234, name: "Group 1"}}
+      #
+      # @example using a different key name
+      #   one :group, key_name: :my_group
+      #   # => {my_group: {id: 1234, name: "Group 1"}}
+      #
+      # @example using cache
+      #   one :group, cache: true
+      #   # => {group: {id: 1234, name: "Group 1"}}
+      #
+      # @example using cache and expires_in
+      #   one :group, cache: {expires_in: 1.hour}
+      #   # => {group: {id: 1234, name: "Group 1"}}
+      #
+      # @param key [Symbol] the association name
+      # @param key_name [Symbol] the key name in the hash
+      # @param serializer [Class] the serializer to use
+      # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] whether to cache the result, or a hash with options for the cache
+      # @param block [Proc] a block to use to define the serializer inline
       def one(key, key_name: nil, serializer: nil, cache: false, &block)
         key_name ||= key
         if block
@@ -45,6 +140,39 @@ module Barley
         set_class_iv(:@defined_attributes, key_name)
       end
 
+      # Defines a collection association for the serializer
+      #
+      # @example using the default serializer of the associated model
+      #   many :groups
+      #   # => {groups: [{id: 1234, name: "Group 1"}, {id: 5678, name: "Group 2"}]}
+      #
+      # @example using a custom serializer
+      #   many :groups, serializer: MyCustomGroupSerializer
+      #   # => {groups: [{id: 1234, name: "Group 1"}, {id: 5678, name: "Group 2"}]}
+      #
+      # @example using a block with an inline serializer definition
+      #   many :groups do
+      #     attributes :id, :name
+      #   end
+      #   # => {groups: [{id: 1234, name: "Group 1"}, {id: 5678, name: "Group 2"}]}
+      #
+      # @example using a different key name
+      #   many :groups, key_name: :my_groups
+      #   # => {my_groups: [{id: 1234, name: "Group 1"}, {id: 5678, name: "Group 2"}]}
+      #
+      # @example using cache
+      #   many :groups, cache: true
+      #   # => {groups: [{id: 1234, name: "Group 1"}, {id: 5678, name: "Group 2"}]}
+      #
+      # @example using cache and expires_in
+      #   many :groups, cache: {expires_in: 1.hour}
+      #   # => {groups: [{id: 1234, name: "Group 1"}, {id: 5678, name: "Group 2"}]}
+      #
+      # @param key [Symbol] the association name
+      # @param key_name [Symbol] the key name in the hash
+      # @param serializer [Class] the serializer to use
+      # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] whether to cache the result, or a hash with options for the cache
+      # @param block [Proc] a block to use to define the serializer inline
       def many(key, key_name: nil, serializer: nil, cache: false, &block)
         key_name ||= key
         if block
@@ -62,6 +190,12 @@ module Barley
         set_class_iv(:@defined_attributes, key_name)
       end
 
+      # Either sets or appends a key to an instance variable
+      #
+      # @api private
+      #
+      # @param iv [Symbol] the instance variable to set
+      # @param key [Symbol] the key to add to the instance variable
       def set_class_iv(iv, key)
         instance_variable_defined?(iv) ? instance_variable_get(iv) << key : instance_variable_set(iv, [key])
       end
@@ -69,8 +203,13 @@ module Barley
 
     # @example with cache
     #   Barley::Serializer.new(object, cache: true)
+    #
     # @example with cache and expires_in
     #   Barley::Serializer.new(object, cache: {expires_in: 1.hour})
+    #
+    # @param object [Object] the object to serialize
+    # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] a boolean to cache the result, or a hash with options for the cache
+    # @param root [Boolean] whether to include the root key in the hash
     def initialize(object, cache: false, root: false)
       @object = object
       @root = root
@@ -81,6 +220,9 @@ module Barley
       end
     end
 
+    # Serializes the object
+    #
+    # @return [Hash] the serializable hash
     def serializable_hash
       if @cache
         Barley::Cache.fetch(cache_base_key, expires_in: @expires_in) do
@@ -91,12 +233,20 @@ module Barley
       end
     end
 
+    # Clears the cache for the object
+    #
+    # @param key [String] the cache key
+    #
+    # @return [Boolean] whether the cache was cleared
     def clear_cache(key: cache_base_key)
       Barley::Cache.delete(key)
     end
 
     private
 
+    # @api private
+    #
+    # @return [String] the cache key
     def cache_base_key
       if object.updated_at.present?
         "#{object.class.name&.underscore}/#{object.id}/#{object.updated_at&.to_i}/barley_cache/"
@@ -105,10 +255,18 @@ module Barley
       end
     end
 
+    # @api private
+    #
+    # @return [Array<Symbol>] the defined attributes
     def defined_attributes
       self.class.instance_variable_get(:@defined_attributes)
     end
 
+    # Serializes the object
+    #
+    # @api private
+    #
+    # @return [Hash] the serializable hash
     def _serializable_hash
       hash = {}
 
@@ -119,6 +277,9 @@ module Barley
       @root ? {root_key => hash} : hash
     end
 
+    # @api private
+    #
+    # @return [Symbol] the root key, based on the class name
     def root_key
       object.class.name.underscore.to_sym
     end

@@ -19,4 +19,5 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency "rails", ">= 6.1.0"
+  spec.add_dependency "dry-types", "~> 1.7.1"
 end
