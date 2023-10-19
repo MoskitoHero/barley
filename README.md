@@ -1,4 +1,4 @@
-![Barley loqo](./img/barley.png)
+![Barley loqo](https://i.imgur.com/am0emi4.png)
 
 Barley is a dead simple, fast, and efficient ActiveModel JSON serializer.
 
@@ -364,4 +364,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Credits
 Barley is brought to you by the developer team from [StockPro](https://www.stock-pro.fr/).
 
-[![Barley is brought to you by StockPro](img/stockpro.png)](https://www.stock-pro.fr/)
+[![Barley is brought to you by StockPro](https://i.imgur.com/5a0veEG.png)](https://www.stock-pro.fr/)
