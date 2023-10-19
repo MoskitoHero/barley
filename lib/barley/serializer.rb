@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-require "dry-types"
-
-module Types
-  include Dry.Types()
-end
-
 module Barley
   class Serializer
     attr_accessor :object
@@ -27,7 +21,7 @@ module Barley
       #   attributes :id, name: Types::Strict::String, email: Types::Strict::String
       #   # => {id: 1234, name: "John Doe", email: "john.doe@example"}
       #
-      # @see #attribute
+      # @see Serializer#attribute
       #
       # @param keys [Hash<Symbol, Dry::Types>, Array<Symbol>] mix of symbols and hashes of symbols and Dry::Types
       def attributes(*keys)
