@@ -1,6 +1,8 @@
 ![Barley loqo](https://i.imgur.com/am0emi4.png)
 
 ![Test suite badge](https://github.com/MoskitoHero/barley/actions/workflows/ruby.yml/badge.svg)
+[![Gem Version](https://badge.fury.io/rb/barley.svg)](https://badge.fury.io/rb/barley)
+![Static Badge](https://img.shields.io/badge/Cereal%20-%20100%25%20-%20darklime)
 
 Barley is a dead simple, fast, and efficient ActiveModel serializer.
 
