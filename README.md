@@ -1,5 +1,7 @@
 ![Barley loqo](https://i.imgur.com/am0emi4.png)
 
+![Test suite badge](https://github.com/MoskitoHero/barley/actions/workflows/ruby.yml/badge.svg)
+
 Barley is a dead simple, fast, and efficient ActiveModel serializer.
 
 Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster. 
