@@ -1,8 +1,8 @@
 ![Barley loqo](https://i.imgur.com/am0emi4.png)
 
-Barley is a dead simple, fast, and efficient ActiveModel JSON serializer.
+Barley is a dead simple, fast, and efficient ActiveModel serializer.
 
-Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching baked in. Our daily bread is to make your API faster. 
+Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster. 
 
 You don't believe us? Check out the [benchmarks](#benchmarks). 😎
 
@@ -24,17 +24,23 @@ Then define your attributes and associations in a serializer class.
 ```ruby
 # /app/serializers/user_serializer.rb
 class UserSerializer < Barley::Serializer
-  attributes id: Types::Strict::Integer, :name # multiple attributes, optional type checking with dry-types
-  attribute :email # single attribute
-  attribute :value, type: Types::Coercible::Integer # optional type checking with dry-types
+  
+  attributes id: Types::Strict::Integer, :name
+  
+  attribute :email
+  attribute :value, type: Types::Coercible::Integer
 
-  many :posts # relations
-  one :group, serializer: CustomGroupSerializer # custom serializer
-  many :related_users, key: :friends, cache: true # custom key, and caching
-  one :profile, cache: { expires_in: 1.day } do # cache definition, and block (on associations) for nested, on-the-fly serializer
+  many :posts
+  
+  one :group, serializer: CustomGroupSerializer
+  
+  many :related_users, key: :friends, cache: true
+  
+  one :profile, cache: { expires_in: 1.day } do
     attributes :avatar, :social_url
+    
     attribute :badges do
-      object.badges.map(&:display_name) # use object in a block to return custom code
+      object.badges.map(&:display_name)
     end
   end
     
@@ -385,6 +391,15 @@ ams               :    1299674 allocated - 28.20x more
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Contributing
+You can contribute in several ways: reporting bugs, suggesting features, or contributing code. See [our contributing guidelines](CONTRIBUTING.md)
+
+Make sure you adhere to [our code of conduct](CODE_OF_CONDUCT.md). We aim to keep this project open and inclusive.
+
+## Security
+
+Please refer to our [security guidelines](SECURITY.md)
 
 ## Credits
 Barley is brought to you by the developer team from [StockPro](https://www.stock-pro.fr/).
