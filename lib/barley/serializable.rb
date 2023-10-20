@@ -43,7 +43,11 @@ module Barley
     end
 
     included do
-      serializer "#{self}Serializer".constantize
+      begin
+        serializer "#{self}Serializer".constantize
+      rescue NameError
+        raise Barley::Error, "Could not find serializer for #{self}. Please define a #{self}Serializer class."
+      end
 
       # Serializes the model
       #
@@ -57,7 +61,11 @@ module Barley
       # @return [Hash] the serialized attributes
       def as_json(serializer: nil, cache: false, root: false)
         serializer ||= self.serializer.class
-        serializer.new(self, cache: cache, root: root).serializable_hash
+        begin
+          serializer.new(self, cache: cache, root: root).serializable_hash
+        rescue NameError
+          raise Barley::Error, "Could not find serializer for #{self}. Please define a #{serializer} class."
+        end
       end
     end
   end
