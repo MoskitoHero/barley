@@ -4,6 +4,7 @@ class Serializer
   @expires_in: ActiveSupport::Duration
   @root: bool
 
+  attr_accessor self.defined_attributes: Array[Symbol]
   attr_accessor object: ActiveRecord::Base
   def self.attributes: (*(Symbol | Hash[Symbol, untyped]) keys) -> untyped
   def self.attribute: (Symbol key, ?key_name: Symbol | nil, ?type: nil) ?{ () -> void } -> [untyped]

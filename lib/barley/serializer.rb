@@ -5,6 +5,8 @@ module Barley
     attr_accessor :object
 
     class << self
+      attr_accessor :defined_attributes
+
       # Defines attributes for the serializer
       #
       # Accepts either a list of symbols or a hash of symbols and Dry::Types, or a mix of both
@@ -72,16 +74,12 @@ module Barley
       # @param block [Proc] a block to use to compute the value
       def attribute(key, key_name: nil, type: nil, &block)
         key_name ||= key
-        if block
-          define_method(key_name) do
-            type.nil? ? instance_eval(&block) : type[instance_eval(&block)]
-          end
-        else
-          define_method(key_name) do
-            type.nil? ? object.send(key) : type[object.send(key)]
-          end
+        define_method(key_name) do
+          value = block ? instance_eval(&block) : object.send(key)
+          type.nil? ? value : type[value]
         end
-        set_class_iv(:@defined_attributes, key_name)
+
+        self.defined_attributes = (defined_attributes || []) << key_name
       end
 
       # Defines a single association for the serializer
@@ -131,7 +129,7 @@ module Barley
           el_serializer = serializer || element.serializer.class
           el_serializer.new(element, cache: cache).serializable_hash
         end
-        set_class_iv(:@defined_attributes, key_name)
+        self.defined_attributes = (defined_attributes || []) << key_name
       end
 
       # Defines a collection association for the serializer
@@ -181,17 +179,7 @@ module Barley
           el_serializer = serializer || elements.first.serializer.class
           elements.map { |element| el_serializer.new(element, cache: cache).serializable_hash }.reject(&:blank?)
         end
-        set_class_iv(:@defined_attributes, key_name)
-      end
-
-      # Either sets or appends a key to an instance variable
-      #
-      # @api private
-      #
-      # @param iv [Symbol] the instance variable to set
-      # @param key [Symbol] the key to add to the instance variable
-      def set_class_iv(iv, key)
-        instance_variable_defined?(iv) ? instance_variable_get(iv) << key : instance_variable_set(iv, [key])
+        self.defined_attributes = (defined_attributes || []) << key_name
       end
     end
 
@@ -253,7 +241,7 @@ module Barley
     #
     # @return [Array<Symbol>] the defined attributes
     def defined_attributes
-      self.class.instance_variable_get(:@defined_attributes)
+      self.class.defined_attributes
     end
 
     # Serializes the object
