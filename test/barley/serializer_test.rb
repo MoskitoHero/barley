@@ -6,6 +6,9 @@ module Barley
   class SerializerTest < ActiveSupport::TestCase
     setup do
       @user = users(:one)
+      Barley.configure do |config|
+        config.cache_store = ActiveSupport::Cache::MemoryStore.new
+      end
     end
 
     test "it serializes a model" do

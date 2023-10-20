@@ -9,6 +9,10 @@ class SerializerGeneratorTest < Rails::Generators::TestCase
   destination Rails.root.join("tmp/generators")
   setup :prepare_destination
 
+  teardown do
+    FileUtils.rm_rf(destination_root)
+  end
+
   test "should add a serializer file" do
     run_generator %w[post]
     assert_file "app/serializers/post_serializer.rb", /class PostSerializer < Barley::Serializer/

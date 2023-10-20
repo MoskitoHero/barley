@@ -30,8 +30,14 @@ module Barley
       # @param klass [Class] the serializer class
       # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] whether to cache the result, or a hash with options for the cache
       def serializer(klass, cache: false)
-        define_method(:serializer) do
-          klass.new(self, cache: cache)
+        # We need to silence the warnings because we are defining a method with the same name as the parameter
+        # This avoids :
+        # - warning: method redefined; discarding old serializer
+        # - warning: previous definition of serializer was here
+        Kernel.silence_warnings do
+          define_method(:serializer) do
+            klass.new(self, cache: cache)
+          end
         end
       end
     end
