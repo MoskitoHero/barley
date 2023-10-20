@@ -2,7 +2,6 @@ name: Ruby Gem
 
 on:
   push:
-    branches: [ "main" ]
     tags:
       - 'v*'
 
