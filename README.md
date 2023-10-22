@@ -51,7 +51,7 @@ class UserSerializer < Barley::Serializer
 end
 ```
 
-The just use the `as_json` method on your model.
+Then just use the `as_json` method on your model.
 
 ```ruby
 user = User.find(1)
