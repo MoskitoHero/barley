@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.1 (2023-10-27)
+### 🐛 Bug fixes
+- Fixed the `as_json` method to comply with rails standards. It now accepts an `option` hash as an argument, which allows usage on an `Array` - and therefore on `ActiveRecord::Relation` - as well as on a single object. Updated the documentation to reflect this change. This does not break compatibility with previous versions.
+
 ## v0.4.0 (2023-10-19)
 ### ✨New features
 - Added type-checking to the `attributes` and `attribute` methods. Now you can do:
