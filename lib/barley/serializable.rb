@@ -54,13 +54,16 @@ module Barley
       # @note this method does not provide default rails options like `only` or `except`.
       #   This is because the Barley serializer should be the only place where the attributes are defined.
       #
-      # @param serializer [Class] the serializer to use
-      # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] whether to cache the result, or a hash with options for the cache
-      # @param root [Boolean] whether to include the root key in the hash
+      # @option options [Class] :serializer the serializer to use
+      # @option options [Boolean, Hash<Symbol, ActiveSupport::Duration>] :cache whether to cache the result, or a hash with options for the cache
+      # @option options [Boolean] :root whether to include the root key
       #
       # @return [Hash] the serialized attributes
-      def as_json(serializer: nil, cache: false, root: false)
-        serializer ||= self.serializer.class
+      def as_json(options = nil)
+        options ||= {}
+        serializer = options[:serializer] || self.serializer.class
+        cache = options[:cache] || false
+        root = options[:root] || false
         begin
           serializer.new(self, cache: cache, root: root).serializable_hash
         rescue NameError
