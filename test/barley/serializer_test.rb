@@ -112,5 +112,13 @@ module Barley
       }
       assert_equal(expected, serializer.new(@user).serializable_hash)
     end
+
+    test "it raises an error when Serializer class has no attributes" do
+      serializer = Class.new(Barley::Serializer) do
+      end
+      assert_raises Barley::Error do
+        serializer.new(@user).serializable_hash
+      end
+    end
   end
 end

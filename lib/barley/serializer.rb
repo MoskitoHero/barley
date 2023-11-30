@@ -247,15 +247,15 @@ module Barley
     # Serializes the object
     #
     # @api private
+    # @raise [Barley::Error] if no attribute or relation is defined in the serializer
     #
     # @return [Hash] the serializable hash
     def _serializable_hash
-      hash = {}
+      raise Barley::Error, "No attribute or relation defined in #{self.class}" if defined_attributes.blank?
 
-      defined_attributes.each do |key|
-        hash[key] = send(key)
+      hash = defined_attributes.each_with_object({}) do |key, result|
+        result[key] = send(key)
       end
-
       @root ? {root_key => hash} : hash
     end
 
