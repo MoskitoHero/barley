@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/barley.svg)](https://badge.fury.io/rb/barley)
 ![Static Badge](https://img.shields.io/badge/Cereal%20-%20100%25%20-%20darklime)
 
-Barley is a dead simple, fast, and efficient ActiveModel serializer.
+Barley is a simple, fast, and efficient ActiveModel serializer.
 
 Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster. 
 
