@@ -1,10 +1,12 @@
 module Barley
 class Serializer
   @cache: bool
+  @context: Struct[untyped]
   @expires_in: ActiveSupport::Duration
   @root: bool
 
   attr_accessor self.defined_attributes: Array[Symbol]
+  attr_accessor context: Struct[untyped]
   attr_accessor object: ActiveRecord::Base
   def self.attributes: (*(Symbol | Hash[Symbol, untyped]) keys) -> untyped
   def self.attribute: (Symbol key, ?key_name: Symbol | nil, ?type: nil) ?{ () -> void } -> [untyped]
@@ -14,6 +16,7 @@ class Serializer
   def initialize: (untyped object, ?cache: bool | Hash[Symbol, ActiveSupport::Duration], ?root: bool) -> void
   def serializable_hash: -> Hash[Symbol, untyped]
   def clear_cache: (?key: String) -> untyped
+  def with_context:(*(Hash[Symbol, untyped])) -> self
 
   private
   def cache_base_key: -> String

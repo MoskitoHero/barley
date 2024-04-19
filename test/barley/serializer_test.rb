@@ -120,5 +120,21 @@ module Barley
         serializer.new(@user).serializable_hash
       end
     end
+
+    test "it serializes with context" do
+      serializer = Class.new(Barley::Serializer) do
+        attributes :id, :email
+
+        attribute :note do
+          context[:note]
+        end
+      end
+      expected = {
+        id: @user.id,
+        email: @user.email,
+        note: "new note"
+      }
+      assert_equal(expected, serializer.new(@user).with_context(note: "new note").serializable_hash)
+    end
   end
 end

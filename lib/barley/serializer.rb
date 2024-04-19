@@ -3,6 +3,7 @@
 module Barley
   class Serializer
     attr_accessor :object
+    attr_accessor :context
 
     class << self
       attr_accessor :defined_attributes
@@ -222,6 +223,25 @@ module Barley
     # @return [Boolean] whether the cache was cleared
     def clear_cache(key: cache_base_key)
       Barley::Cache.delete(key)
+    end
+
+    # Sets the context object for the serializer
+    #
+    # The context object is a Struct built from the given arguments.
+    # It can be used to pass additional data to the serializer. The context object is accessible in the serializer with the `context` attribute.
+    # @example
+    #   serializer.with_context(current_user: current_user, locale: I18n.locale)
+    #   # => #<Barley::Serializer:0x00007f8f3b8b3e08 @object=#<Product id: 1, name: "Product 1">, @context=#<struct current_user=1, locale=:en>>
+    #   # In the serializer:
+    #   attribute :name do
+    #     "#{object.name[context.locale]}" # Will use the locale from the context
+    #   end
+    # @param args [Hash] the context object attributes
+    # @return [Barley::Serializer] the serializer
+    def with_context(**args)
+      @context = Struct.new(*args.keys).new(*args.values)
+
+      self
     end
 
     private
