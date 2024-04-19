@@ -200,6 +200,25 @@ Feel like using a block to define your associations? You can do that too.
   end
 ```
 
+## Context
+You can pass a context to the serializer with the `with_context` method.
+
+```ruby
+serializer = PostSerializer.new(Post.last).with_context(current_user: current_user)
+```
+
+This context will be available in the serializer with the `context` method.
+
+```ruby
+class PostSerializer < Barley::Serializer
+  attributes :id, :title, :body
+
+  attribute :is_owner do
+    object.user == context.current_user
+  end
+end
+```
+
 ## Generators
 You have two generators available. One to generate the serializer class:
 
