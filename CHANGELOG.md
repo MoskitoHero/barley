@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.5.0 (2024-04-19)
+### ✨New features
+- Added the `with_context` method to the serializer. This method allows you to pass a context hash to the serializer, which can be used to pass arguments to the serializer, that can be used with a `context` object within the serializer definition.
+    ```ruby
+    class UserSerializer < Barley::Serializer
+        attributes :id, :name
+    
+        def name
+        if context[:upcase]
+            object.name.upcase
+        else
+            object.name
+        end
+        end
+    end
+    
+    Serializer.new(User.last).with_context(upcase: true).serializable_hash
+    # => { id: 1, name: "JOHN DOE" }
+    ```
+    See the README for more details.
+### 📝 Documentation
+- Updated the README to include the new `with_context` method.
+### 🧪 Tests
+- Added tests for the `with_context` method
+- Added benchmark tests
+
 ## v0.4.1 (2023-10-27)
 ### 🐛 Bug fixes
 - Fixed the `as_json` method to comply with rails standards. It now accepts an `option` hash as an argument, which allows usage on an `Array` - and therefore on `ActiveRecord::Relation` - as well as on a single object. Updated the documentation to reflect this change. This does not break compatibility with previous versions.
