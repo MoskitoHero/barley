@@ -36,6 +36,10 @@ class UserSerializer < Barley::Serializer
 
   many :posts
   
+  many :posts, key_name: :featured, scope: :featured
+  
+  many :posts, key_name: :popular, scope: -> { where("views > 10_000").limit(3) }
+  
   one :group, serializer: CustomGroupSerializer
   
   many :related_users, key: :friends, cache: true
@@ -174,6 +178,17 @@ You can define a custom serializer for the association with the `serializer` opt
   many :posts, serializer: CustomPostSerializer, cache: { expires_in: 1.hour }
 ```
 
+##### Scope
+You can pass a scope to the association with the `scope` option. It can either be a symbol referencing a named scope on your associated model, or a lambda.
+
+```ruby
+  many :posts, scope: :published # given you have a scope named `published` on your Post model
+```
+
+```ruby
+  many :posts, scope: -> { where(published: true).limit(4) }
+```
+
 ##### Key name
 You can also pass a key name for the association with the `key_name` option.
 
@@ -197,6 +212,14 @@ Feel like using a block to define your associations? You can do that too.
     one :author do
       attributes :name, :email
     end
+  end
+```
+
+Of course, all the options available for the `one` and `many` macros are also available for the block syntax.
+
+```ruby
+  many :posts, key_name: :featured do
+    attributes :id, :title, :body
   end
 ```
 

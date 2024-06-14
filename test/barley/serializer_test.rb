@@ -153,5 +153,37 @@ module Barley
       }
       assert_equal(expected, serializer.new(@user, context: my_context).serializable_hash)
     end
+
+    test "it serializes a many association with a named scope" do
+      serializer = Class.new(Barley::Serializer) do
+        attributes :id, :email
+
+        many :groups, scope: :active do
+          attributes :id, :name
+        end
+      end
+      expected = {
+        id: @user.id,
+        email: @user.email,
+        groups: @user.groups.active.map { |g| {id: g.id, name: g.name} }
+      }
+      assert_equal(expected, serializer.new(@user).serializable_hash)
+    end
+
+    test "it serializes a many association with a lambda scope" do
+      serializer = Class.new(Barley::Serializer) do
+        attributes :id, :email
+
+        many :groups, scope: -> { limit(1) } do
+          attributes :id, :name
+        end
+      end
+      expected = {
+        id: @user.id,
+        email: @user.email,
+        groups: @user.groups.limit(1).map { |g| {id: g.id, name: g.name} }
+      }
+      assert_equal(expected, serializer.new(@user).serializable_hash)
+    end
   end
 end
