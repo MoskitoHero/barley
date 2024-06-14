@@ -201,13 +201,14 @@ Feel like using a block to define your associations? You can do that too.
 ```
 
 ## Context
+
 You can pass a context to the serializer with the `with_context` method.
 
 ```ruby
 serializer = PostSerializer.new(Post.last).with_context(current_user: current_user)
 ```
 
-This context will be available in the serializer with the `context` method.
+This context will be available in the serializer with the `context` method. It is also available in nested serializers.
 
 ```ruby
 class PostSerializer < Barley::Serializer
@@ -216,7 +217,24 @@ class PostSerializer < Barley::Serializer
   attribute :is_owner do
     object.user == context.current_user
   end
+  
+  many :comments do
+    many :likes do
+      attribute :is_owner do
+        object.user == context.current_user # context is here too!
+      end
+    end
+  end
 end
+```
+
+### Using a custom context object
+Barley generates a Struct from the context hash you pass to the with_context method. But you can also pass a custom context object directly in the initializer instead.
+
+```ruby
+my_context = Struct.new(:current_user).new(current_user)
+
+serializer = PostSerializer.new(Post.last, context: my_context)
 ```
 
 ## Generators
