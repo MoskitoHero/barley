@@ -161,12 +161,20 @@ module Barley
       #   many :groups, cache: {expires_in: 1.hour}
       #   # => {groups: [{id: 1234, name: "Group 1"}, {id: 5678, name: "Group 2"}]}
       #
+      # @example using a named scope
+      #   many :groups, scope: :active # given the scope `active` is defined in the Group model
+      #   # => {groups: [{id: 5678, name: "Group 2"}]}
+      #
+      # @example using a lambda scope
+      #   many :groups, scope: -> { order(id: :asc).limit(1) }
+      #   # => {groups: [{id: 1234, name: "Group 1"}]}
       # @param key [Symbol] the association name
       # @param key_name [Symbol] the key name in the hash
       # @param serializer [Class] the serializer to use
       # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] whether to cache the result, or a hash with options for the cache
+      # @param scope [Symbol] the scope to use to fetch the elements
       # @param block [Proc] a block to use to define the serializer inline
-      def many(key, key_name: nil, serializer: nil, cache: false, &block)
+      def many(key, key_name: nil, serializer: nil, cache: false, scope: nil, &block)
         key_name ||= key
         if block
           serializer = Class.new(Barley::Serializer) do
