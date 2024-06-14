@@ -1,12 +1,17 @@
 # Changelog
 
+## v0.6.1 (2024-06-14)
+
+`v0.6.1` is a patch release that fixes a bug in the `scope` argument of the `many` method.
+
 ## v0.6.0 (2024-06-14)
+
 ### ✨New features
 - Added the `context` argument to the serializer's `initialize` method. This allows you to pass a context hash to the serializer, which can be used to pass arguments to the serializer, that can be used with a `context` object within the serializer definition.
     ```ruby
     class UserSerializer < Barley::Serializer
         attributes :id, :name
-    
+
         def name
         if context[:upcase]
             object.name.upcase
@@ -15,7 +20,7 @@
         end
         end
     end
-    
+
     Serializer.new(User.last, context: {upcase: true}).serializable_hash
     # => { id: 1, name: "JOHN DOE" }
     ```
@@ -27,7 +32,7 @@
         many :posts, scope: :published do
             attributes :id, :title
         end
-   
+
         many :posts, key: :popular, scope: -> { where("views > 10_000").order(views: :desc).limit(5) } do
             attributes :id, :title
         end
@@ -47,7 +52,7 @@
     ```ruby
     class UserSerializer < Barley::Serializer
         attributes :id, :name
-    
+
         def name
         if context[:upcase]
             object.name.upcase
@@ -56,7 +61,7 @@
         end
         end
     end
-    
+
     Serializer.new(User.last).with_context(upcase: true).serializable_hash
     # => { id: 1, name: "JOHN DOE" }
     ```
@@ -110,10 +115,10 @@ User.last.as_json(root: true)
   ```ruby
   many :posts do
     attributes :id, :title, :body
-  
+
     one :author do
       attributes :name, :email
- 
+
       one :profile, key_name: :author_profile do
         attributes :id, :bio
       end

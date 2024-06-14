@@ -172,7 +172,7 @@ module Barley
       # @param key_name [Symbol] the key name in the hash
       # @param serializer [Class] the serializer to use
       # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] whether to cache the result, or a hash with options for the cache
-      # @param scope [Symbol] the scope to use to fetch the elements
+      # @param scope [Symbol, Proc] the scope to use to fetch the elements
       # @param block [Proc] a block to use to define the serializer inline
       def many(key, key_name: nil, serializer: nil, cache: false, scope: nil, &block)
         key_name ||= key
@@ -183,6 +183,11 @@ module Barley
         end
         define_method(key_name) do
           elements = object.send(key)
+          if scope.is_a?(Symbol)
+            elements = elements.send(scope)
+          elsif scope.is_a?(Proc)
+            elements = elements.instance_exec(&scope)
+          end
           return [] if elements.empty?
 
           el_serializer = serializer || elements.first.serializer.class

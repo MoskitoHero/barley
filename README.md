@@ -6,7 +6,7 @@
 
 Barley is a fast and efficient ActiveModel serializer.
 
-Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster. 
+Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster.
 
 You don't believe us? Check out the [benchmarks](#benchmarks). 😎
 
@@ -28,30 +28,30 @@ Then define your attributes and associations in a serializer class.
 ```ruby
 # /app/serializers/user_serializer.rb
 class UserSerializer < Barley::Serializer
-  
+
   attributes id: Types::Strict::Integer, :name
-  
+
   attribute :email
   attribute :value, type: Types::Coercible::Integer
 
   many :posts
-  
+
   many :posts, key_name: :featured, scope: :featured
-  
+
   many :posts, key_name: :popular, scope: -> { where("views > 10_000").limit(3) }
-  
+
   one :group, serializer: CustomGroupSerializer
-  
+
   many :related_users, key: :friends, cache: true
-  
+
   one :profile, cache: { expires_in: 1.day } do
     attributes :avatar, :social_url
-    
+
     attribute :badges do
       object.badges.map(&:display_name)
     end
   end
-    
+
 end
 ```
 
@@ -89,7 +89,7 @@ You can also define the serializer class with the `serializer` macro.
 # /app/models/user.rb
 class User < ApplicationRecord
   include Barley::Serializable
-  
+
   serializer UserSerializer
 end
 ```
@@ -143,12 +143,12 @@ You can define a custom serializer for the association with the `serializer` opt
 
 You can of course define serializers with inner classes for simple needs.
 
-```ruby 
+```ruby
 class UserSerializer < Barley::Serializer
   attributes :id, :name, :email, :created_at, :updated_at
 
   one :group, serializer: LocalGroupSerializer
-  
+
     class LocalGroupSerializer < Barley::Serializer
         attributes :id, :name
     end
@@ -208,7 +208,7 @@ Feel like using a block to define your associations? You can do that too.
 ```ruby
   many :posts do
     attributes :id, :title, :body
-  
+
     one :author do
       attributes :name, :email
     end
@@ -240,7 +240,7 @@ class PostSerializer < Barley::Serializer
   attribute :is_owner do
     object.user == context.current_user
   end
-  
+
   many :comments do
     many :likes do
       attribute :is_owner do
@@ -264,7 +264,7 @@ serializer = PostSerializer.new(Post.last, context: my_context)
 You have two generators available. One to generate the serializer class:
 
 ```shell
-rails generate barley:serializer User 
+rails generate barley:serializer User
 # or
 rails generate barley:serializer User --name=CustomUserSerializer
 ```
@@ -318,7 +318,7 @@ end
 ```
 
 ## Type checking
-Barley can check the type of the object you are serializing with the [dry-types](https://dry-rb.org/gems/dry-types/main/) gem. 
+Barley can check the type of the object you are serializing with the [dry-types](https://dry-rb.org/gems/dry-types/main/) gem.
 
 It will raise an error if the object is not of the expected type, or coerce it to the correct type and perform constraints checks.
 
@@ -345,7 +345,7 @@ You will soon be able to replace all occurrences of `Serializer` with `Cerealize
 # /app/models/user.rb
 class User < ApplicationRecord
   include Barley::Cerealizable
-  
+
   cerealizer UserCerealizer
 end
 
