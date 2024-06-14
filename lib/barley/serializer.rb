@@ -128,7 +128,7 @@ module Barley
           return {} if element.nil?
 
           el_serializer = serializer || element.serializer.class
-          el_serializer.new(element, cache: cache).serializable_hash
+          el_serializer.new(element, cache: cache, context: @context).serializable_hash
         end
         self.defined_attributes = (defined_attributes || []) << key_name
       end
@@ -186,7 +186,7 @@ module Barley
           return [] if elements.empty?
 
           el_serializer = serializer || elements.first.serializer.class
-          elements.map { |element| el_serializer.new(element, cache: cache).serializable_hash }.reject(&:blank?)
+          elements.map { |element| el_serializer.new(element, cache: cache, context: @context).serializable_hash }.reject(&:blank?)
         end
         self.defined_attributes = (defined_attributes || []) << key_name
       end
@@ -201,8 +201,10 @@ module Barley
     # @param object [Object] the object to serialize
     # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] a boolean to cache the result, or a hash with options for the cache
     # @param root [Boolean] whether to include the root key in the hash
-    def initialize(object, cache: false, root: false)
+    # @param context [Object] an optional context object to pass additional data to the serializer
+    def initialize(object, cache: false, root: false, context: nil)
       @object = object
+      @context = context
       @root = root
       @cache, @expires_in = if cache.is_a?(Hash)
         [true, cache[:expires_in]]

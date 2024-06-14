@@ -126,7 +126,7 @@ module Barley
         attributes :id, :email
 
         attribute :note do
-          context[:note]
+          context.note
         end
       end
       expected = {
@@ -135,6 +135,23 @@ module Barley
         note: "new note"
       }
       assert_equal(expected, serializer.new(@user).with_context(note: "new note").serializable_hash)
+    end
+
+    test "it serializes with a context object given to the initializer" do
+      my_context = Struct.new(:note).new("new note")
+      serializer = Class.new(Barley::Serializer) do
+        attributes :id, :email
+
+        attribute :note do
+          context.note
+        end
+      end
+      expected = {
+        id: @user.id,
+        email: @user.email,
+        note: "new note"
+      }
+      assert_equal(expected, serializer.new(@user, context: my_context).serializable_hash)
     end
 
     test "it serializes a many association with a named scope" do

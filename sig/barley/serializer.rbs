@@ -1,7 +1,7 @@
 module Barley
 class Serializer
   @cache: bool
-  @context: Struct[untyped]
+  @context: untyped
   @expires_in: ActiveSupport::Duration
   @root: bool
 
@@ -13,7 +13,7 @@ class Serializer
   def self.one: (Symbol key, ?key_name: Symbol, ?serializer: Serializer, ?cache: bool | Hash[Symbol, ActiveSupport::Duration]) ?{ () -> void } -> (Hash[untyped, untyped] | [untyped])
   def self.many: (Symbol key, ?key_name: Symbol, ?serializer: Serializer, ?cache: bool | Hash[Symbol, ActiveSupport::Duration], ?scope: ^() -> void ) ?{ () -> void } -> Array[untyped]
   def self.set_class_iv: (Symbol iv, Symbol key) -> [untyped]
-  def initialize: (untyped object, ?cache: bool | Hash[Symbol, ActiveSupport::Duration], ?root: bool) -> void
+  def initialize: (untyped object, ?cache: bool | Hash[Symbol, ActiveSupport::Duration], ?root: bool, ?context: untyped) -> void
   def serializable_hash: -> Hash[Symbol, untyped]
   def clear_cache: (?key: String) -> untyped
   def with_context:(*(Hash[Symbol, untyped])) -> self
