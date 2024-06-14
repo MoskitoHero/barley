@@ -1,5 +1,46 @@
 # Changelog
 
+## v0.6.0 (2024-06-14)
+### ✨New features
+- Added the `context` argument to the serializer's `initialize` method. This allows you to pass a context hash to the serializer, which can be used to pass arguments to the serializer, that can be used with a `context` object within the serializer definition.
+    ```ruby
+    class UserSerializer < Barley::Serializer
+        attributes :id, :name
+    
+        def name
+        if context[:upcase]
+            object.name.upcase
+        else
+            object.name
+        end
+        end
+    end
+    
+    Serializer.new(User.last, context: {upcase: true}).serializable_hash
+    # => { id: 1, name: "JOHN DOE" }
+    ```
+    As a side effect, the context is now available in nested associations as well.
+- Added the `scope` argument to the `many` method. This scope can either be a keyword referring to a named scope available on the object, or a lambda that will be called with the object as an argument. This allows you to filter the associated objects.
+    ```ruby
+    class UserSerializer < Barley::Serializer
+        attributes :id, :name
+        many :posts, scope: :published do
+            attributes :id, :title
+        end
+   
+        many :posts, key: :popular, scope: -> { where("views > 10_000").order(views: :desc).limit(5) } do
+            attributes :id, :title
+        end
+    end
+    ```
+    See the README for more details.
+### 📝 Documentation
+- Updated the README to include the new `context` and `scope` arguments.
+### 🧪 Tests
+- Added tests for the `context` and `scope` arguments
+### 🛠️ Chores
+- Updated github actions image to v4
+
 ## v0.5.0 (2024-04-19)
 ### ✨New features
 - Added the `with_context` method to the serializer. This method allows you to pass a context hash to the serializer, which can be used to pass arguments to the serializer, that can be used with a `context` object within the serializer definition.
