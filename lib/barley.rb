@@ -15,6 +15,7 @@ module Barley
 
   autoload :Cache, "barley/cache"
   autoload :Error, "barley/error"
+  autoload :InvalidAttributeError, "barley/error"
   autoload :Serializable, "barley/serializable"
   autoload :Serializer, "barley/serializer"
 end

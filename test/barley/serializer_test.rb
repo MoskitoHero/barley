@@ -185,5 +185,44 @@ module Barley
       }
       assert_equal(expected, serializer.new(@user).serializable_hash)
     end
+
+    test "it serializes an attribute with a coercible type" do
+      serializer = Class.new(Barley::Serializer) do
+        attribute :age, type: Types::Coercible::String
+      end
+      assert_equal({age: @user.profile.age.to_s}, serializer.new(@user.profile).serializable_hash)
+    end
+
+    test "it raises an InvalidAttributeError when an attribute is not coercible" do
+      serializer = Class.new(Barley::Serializer) do
+        attribute :age, type: Types::Coercible::Integer
+      end
+      object = Struct.new(:age).new("not an integer")
+      assert_raises Barley::InvalidAttributeError do
+        serializer.new(object).serializable_hash
+      end
+    end
+
+    test "it gives a readable message to the InvalidAttributeError" do
+      serializer = Class.new(Barley::Serializer) do
+        attribute :age, type: Types::Coercible::Integer
+      end
+      object = Struct.new(:age).new({})
+      begin
+        serializer.new(object).serializable_hash
+      rescue Barley::InvalidAttributeError => e
+        assert_equal "Invalid value type found for attribute age::Integer: {}::Hash", e.message
+      end
+    end
+
+    test "it raises an InvalidAttributeError when an attribute is not strictly typed" do
+      serializer = Class.new(Barley::Serializer) do
+        attribute :age, type: Types::Strict::Integer
+      end
+      object = Struct.new(:age).new(nil)
+      assert_raises Barley::InvalidAttributeError do
+        serializer.new(object).serializable_hash
+      end
+    end
   end
 end
