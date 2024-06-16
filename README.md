@@ -464,8 +464,3 @@ Make sure you adhere to [our code of conduct](CODE_OF_CONDUCT.md). We aim to kee
 ## Security
 
 Please refer to our [security guidelines](SECURITY.md)
-
-## Credits
-Barley is brought to you by the developer team from [StockPro](https://www.stock-pro.fr/).
-
-[![Barley is brought to you by StockPro](https://i.imgur.com/5a0veEG.png)](https://www.stock-pro.fr/)
