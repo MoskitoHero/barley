@@ -73,11 +73,18 @@ module Barley
       # @param key_name [Symbol] the key name in the hash
       # @param type [Dry::Types] the type to use, or coerce the value to
       # @param block [Proc] a block to use to compute the value
+      # @raise [Barley::InvalidAttributeError] if the value does not match the type - when a type is provided
       def attribute(key, key_name: nil, type: nil, &block)
         key_name ||= key
         define_method(key_name) do
           value = block ? instance_eval(&block) : object.send(key)
-          type.nil? ? value : type[value]
+          if type.nil?
+            value
+          else
+            raise Barley::InvalidAttributeError, "Invalid value type found for attribute #{key_name}::#{type.name}: #{value}::#{value.class}" unless type.valid?(value)
+
+            type[value]
+          end
         end
 
         self.defined_attributes = (defined_attributes || []) << key_name
