@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.6.2 (2024-06-17)
+
+### ✨New features
+- Improved error handling of type inconsistencies: now the serializer will raise a `Barley::InvalidAttributeError` if the object's attribute is not of the specified type. This error will include the attribute name, the expected type, and the actual type of the attribute.
+    ```ruby
+    class UserSerializer < Barley::Serializer
+        attributes name: Types::Strict::Integer
+    end
+
+    Serializer.new(User.last).serializable_hash
+    # => Barley::InvalidAttributeError: Invalid value type found for attribute name::Integer: Bob::String"
+    ```
+
 ## v0.6.1 (2024-06-14)
 
 `v0.6.1` is a patch release that fixes a bug in the `scope` argument of the `many` method.
