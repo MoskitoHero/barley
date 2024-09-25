@@ -40,6 +40,8 @@ class UserSerializer < Barley::Serializer
 
   many :posts, key_name: :popular, scope: -> { where("views > 10_000").limit(3) }
 
+  many :posts, key_name: :in_current_language, scope: -> (context) { where(language: context.language) }
+
   one :group, serializer: CustomGroupSerializer
 
   many :related_users, key: :friends, cache: true
@@ -59,7 +61,7 @@ Then just use the `as_json` method on your model.
 
 ```ruby
 user = User.find(1)
-user.as_json
+user.as_json(only: [:id, :name, posts: [:id, :title]])
 ```
 
 ## Installation
@@ -189,6 +191,12 @@ You can pass a scope to the association with the `scope` option. It can either b
   many :posts, scope: -> { where(published: true).limit(4) }
 ```
 
+You can also pass a context to the lambda. See the [context section](#context) for more details.
+
+```ruby
+  many :posts, scope: -> (context) { where(language: context.language) }
+```
+
 ##### Key name
 You can also pass a key name for the association with the `key_name` option.
 
@@ -249,6 +257,12 @@ class PostSerializer < Barley::Serializer
     end
   end
 end
+```
+
+The context is also available in the scope of the lambda passed to the `scope` option of the `many` macro. See the [scope section](#scope) for more details.
+
+```ruby
+  many :posts, scope: -> (context) { where(language: context.language) }
 ```
 
 ### Using a custom context object
