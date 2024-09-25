@@ -65,7 +65,7 @@ module Barley
         cache = options[:cache] || false
         root = options[:root] || false
         begin
-          serializer.new(self, cache: cache, root: root).serializable_hash
+          serializer.new(self, cache: cache, root: root, only: options[:only], except: options[:except]).serializable_hash
         rescue NameError
           raise Barley::Error, "Could not find serializer for #{self}. Please define a #{serializer} class."
         end

@@ -1,5 +1,42 @@
 # Changelog
 
+## v0.7.0 (2024-09-25)
+
+### ✨New features
+- Added the `only` and `except` options to the `attributes` method. This allows you to specify which attributes to include or exclude from the serialization. Will also work with nested associations.
+    ```ruby
+    class UserSerializer < Barley::Serializer
+        attributes :id, :name, :email
+    end
+
+    Serializer.new(User.last, only: [:id, :name]).serializable_hash
+    # => { id: 1, name: "John Doe" }
+    User.last.as_json(only: [:id, :name])
+    # => { id: 1, name: "John Doe" }
+    ```
+    ```ruby
+    class UserSerializer < Barley::Serializer
+        attributes :id, :name, :email
+    end
+
+    Serializer.new(User.last, except: [:email]).serializable_hash
+    # => { id: 1, name: "John Doe" }
+    ```
+    See the README for more details.
+- Added the possibility to pass the context to a `scope` proc / lambda in a `many` association.
+    ```ruby
+    class UserSerializer < Barley::Serializer
+        attributes :id, :name
+        many :posts, scope: ->(context) { where("language > ?", context[:language]) } do
+            attributes :id, :title
+        end
+    end
+
+    Serializer.new(User.last, context: {language: "en_US"}).serializable_hash
+    # => { id: 1, name: "John Doe", posts: [{ id: 1, title: "My first post" }] }
+    ```
+    See the README for more details.
+
 ## v0.6.2 (2024-06-17)
 
 ### ✨New features

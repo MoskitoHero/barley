@@ -135,7 +135,9 @@ module Barley
           return {} if element.nil?
 
           el_serializer = serializer || element.serializer.class
-          el_serializer.new(element, cache: cache, context: @context).serializable_hash
+          only = @only.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @only.present?
+          except = @except.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @except.present?
+          el_serializer.new(element, cache: cache, context: @context, only: only, except: except).serializable_hash
         end
         self.defined_attributes = (defined_attributes || []) << key_name
       end
@@ -193,12 +195,18 @@ module Barley
           if scope.is_a?(Symbol)
             elements = elements.send(scope)
           elsif scope.is_a?(Proc)
-            elements = elements.instance_exec(&scope)
+            elements = if scope.arity == 1
+              elements.instance_exec(@context, &scope)
+            else
+              elements.instance_exec(&scope)
+            end
           end
           return [] if elements.empty?
 
           el_serializer = serializer || elements.first.serializer.class
-          elements.map { |element| el_serializer.new(element, cache: cache, context: @context).serializable_hash }.reject(&:blank?)
+          only = @only.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @only.present?
+          except = @except.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @except.present?
+          elements.map { |element| el_serializer.new(element, cache: cache, context: @context, only: only, except: except).serializable_hash }.reject(&:blank?)
         end
         self.defined_attributes = (defined_attributes || []) << key_name
       end
@@ -214,10 +222,14 @@ module Barley
     # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] a boolean to cache the result, or a hash with options for the cache
     # @param root [Boolean] whether to include the root key in the hash
     # @param context [Object] an optional context object to pass additional data to the serializer
-    def initialize(object, cache: false, root: false, context: nil)
+    # @param only [Array<Symbol>] an array of attributes to include
+    # @param except [Array<Symbol>] an array of attributes to exclude
+    def initialize(object, cache: false, root: false, context: nil, only: nil, except: nil)
       @object = object
       @context = context
       @root = root
+      @only = only
+      @except = except
       @cache, @expires_in = if cache.is_a?(Hash)
         [true, cache[:expires_in]]
       else
@@ -229,13 +241,22 @@ module Barley
     #
     # @return [Hash] the serializable hash
     def serializable_hash
-      if @cache
+      hash = if @cache
         Barley::Cache.fetch(cache_base_key, expires_in: @expires_in) do
           _serializable_hash
         end
       else
         _serializable_hash
       end
+      if @only.present?
+        only = @only.map { |k| k.is_a?(Hash) ? k.keys.first : k }
+        hash.slice!(*only)
+      end
+      if @except.present?
+        except = @except.reject { |k| k.is_a?(Hash) }
+        hash.except!(*except)
+      end
+      hash
     end
 
     # Clears the cache for the object

@@ -29,7 +29,7 @@ module Barley
       mock = Minitest::Mock.new
       serializer_mock = Minitest::Mock.new
       mock.expect(:class, mock)
-      mock.expect(:new, serializer_mock, [model], cache: false, root: false)
+      mock.expect(:new, serializer_mock, [model], cache: false, root: false, only: nil, except: nil)
       serializer_mock.expect(:serializable_hash, {}, [])
 
       model.stub(:serializer, mock) do
@@ -55,7 +55,7 @@ module Barley
       mock = Minitest::Mock.new
       serializer_mock = Minitest::Mock.new
       mock.expect(:class, mock)
-      mock.expect(:new, serializer_mock, [model], cache: true, root: false)
+      mock.expect(:new, serializer_mock, [model], cache: true, root: false, only: nil, except: nil)
       serializer_mock.expect(:serializable_hash, {}, [])
 
       model.stub(:serializer, mock) do
@@ -71,7 +71,7 @@ module Barley
       mock = Minitest::Mock.new
       serializer_mock = Minitest::Mock.new
       mock.expect(:class, mock)
-      mock.expect(:new, serializer_mock, [model], cache: {expires_in: 1.hour}, root: false)
+      mock.expect(:new, serializer_mock, [model], cache: {expires_in: 1.hour}, root: false, only: nil, except: nil)
       serializer_mock.expect(:serializable_hash, {}, [])
 
       model.stub(:serializer, mock) do
@@ -87,11 +87,58 @@ module Barley
       mock = Minitest::Mock.new
       serializer_mock = Minitest::Mock.new
       mock.expect(:class, mock)
-      mock.expect(:new, serializer_mock, [model], cache: false, root: true)
+      mock.expect(:new, serializer_mock, [model], cache: false, root: true, only: nil, except: nil)
       serializer_mock.expect(:serializable_hash, {}, [])
 
       model.stub(:serializer, mock) do
         model.as_json(root: true)
+      end
+
+      mock.verify
+      serializer_mock.verify
+    end
+
+    test "serializer raises error if default serializer is not defined" do
+      assert_raises(Barley::Error) do
+        Class.new do
+          include Barley::Serializable
+        end.new.serializer
+      end
+    end
+
+    test "as_json raises error if custom serializer is not defined" do
+      model = @model.new
+      assert_raises(Barley::Error) do
+        model.as_json
+      end
+    end
+
+    test "as_json with only option calls the serializer with only option" do
+      model = @model.new
+      mock = Minitest::Mock.new
+      serializer_mock = Minitest::Mock.new
+      mock.expect(:class, mock)
+      mock.expect(:new, serializer_mock, [model], cache: false, root: false, only: [:name], except: nil)
+      serializer_mock.expect(:serializable_hash, {}, [])
+
+      model.stub(:serializer, mock) do
+        model.as_json(only: [:name])
+      end
+
+      mock.verify
+      serializer_mock.verify
+    end
+
+    test "as_json with except option calls the serializer with except option" do
+      model = @model.new
+      mock = Minitest::Mock.new
+      serializer_mock = Minitest::Mock.new
+      mock.expect(:class, mock)
+      mock.expect(:new, serializer_mock, [model], cache: false, root: false, only: nil, except: [:name])
+      serializer_mock.expect(:serializable_hash, {}, [])
+
+      model.stub(:serializer, mock) do
+        model.as_json(except: [:name])
       end
 
       mock.verify
