@@ -4,9 +4,53 @@ module Barley
   class Serializer
     attr_accessor :object
     attr_accessor :context
+    attr_accessor :before_serialize, :around_serialize, :after_serialize
 
     class << self
+      HOOKS = %i[
+        before_serialize before_one before_many before_attribute
+        after_serialize after_one after_many after_attribute
+        around_serialize around_one around_many around_attribute
+      ].freeze
+
       attr_accessor :defined_attributes
+
+      def inherited(subclass)
+        subclass.instance_variable_set(:@before_serialize, [])
+      end
+
+      def use(*middlewares)
+        middlewares.each do |middleware|
+          middleware.register(self)
+        end
+      end
+
+      # Registers a middleware to the serializer
+      # @example
+      #  class MyMiddleware < Barley::Middleware
+      #    def call
+      #     # do something
+      #    end
+      #
+      #   def self.register(serializer)
+      #     serializer.register_middleware(:before_serialize, self)
+      #
+      #     # or, given you have a class MyMiddleware::AroundMiddleware that you want to register to multiple hooks
+      #     serializer.register_middleware([:around_attribute, :around_one, :around_many], MyMiddleware::AroundMiddleware)
+      #
+      #     # or even call `.register` on multiple middlewares
+      #     MyMiddleware::BeforeMiddleware.register(serializer)
+      #     MyMiddleware::AfterMiddleware.register(serializer)
+      #  end
+      # end
+      #
+      # @param hooks [Array<Symbol>] the hooks to register the middleware to)
+      # @param middleware [Class] the middleware class
+      def register_middleware(*hooks, middleware)
+        hooks.each do |hook|
+          send(hook).push(middleware).uniq!
+        end
+      end
 
       # Defines attributes for the serializer
       #
@@ -74,17 +118,12 @@ module Barley
       # @param type [Dry::Types] the type to use, or coerce the value to
       # @param block [Proc] a block to use to compute the value
       # @raise [Barley::InvalidAttributeError] if the value does not match the type - when a type is provided
-      def attribute(key, key_name: nil, type: nil, &block)
+      def attribute(key, key_name: nil, **options, &block)
         key_name ||= key
         define_method(key_name) do
-          value = block ? instance_eval(&block) : object.send(key)
-          if type.nil?
-            value
-          else
-            raise Barley::InvalidAttributeError, "Invalid value type found for attribute #{key_name}::#{type.name}: #{value}::#{value.class}" unless type.valid?(value)
-
-            type[value]
-          end
+          run_hooks(:before_attribute, key: key, key_name: key_name, **options)
+          call_around_hooks(:around_attribute, key: key, key_name: key_name, **options, &block)
+          run_hooks(:after_attribute, key: key, key_name: key_name, **options)
         end
 
         self.defined_attributes = (defined_attributes || []) << key_name
@@ -211,6 +250,22 @@ module Barley
         self.defined_attributes = (defined_attributes || []) << key_name
       end
     end
+
+    def run_hooks(hook, key:, key_name: nil, options: {})
+      binding.break
+      self.class.send(hook).each do |middleware|
+        middleware.call(key, key_name: key_name, options: options)
+      end
+    end
+
+    def call_around_hooks(hooks, key:, key_name: nil, options:, &block)
+      return (block ? instance_eval(&block) : object.send(key)) if hooks.empty?
+
+      hooks.first.call(key, key_name: key_name, options: options) do
+        call_around_hooks(hooks.drop(1), key: key, key_name: key_name, options: options, &block)
+      end
+    end
+
 
     # @example with cache
     #   Barley::Serializer.new(object, cache: true)

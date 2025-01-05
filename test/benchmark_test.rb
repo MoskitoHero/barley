@@ -7,6 +7,7 @@ class BenchmarkTest < Minitest::Benchmark
   def setup
     @user = Struct.new(:id, :email, :created_at, :updated_at, :groups, :profile).new(1, "john@doe.com", Time.now, Time.now, [], nil)
     @serializer = Class.new(Barley::Serializer) do
+      use Barley::Middleware
       attributes :id, :email, :created_at, :updated_at
       one :profile
       many :groups

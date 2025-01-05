@@ -18,4 +18,5 @@ module Barley
   autoload :InvalidAttributeError, "barley/error"
   autoload :Serializable, "barley/serializable"
   autoload :Serializer, "barley/serializer"
+  autoload :Middleware, "barley/middleware"
 end
