@@ -1,4 +1,4 @@
-![Barley loqo](https://i.imgur.com/am0emi4.png)
+![Barley loqo](https://i.imgur.com/cJJRA0i.png)
 
 ![Test suite badge](https://github.com/MoskitoHero/barley/actions/workflows/ruby.yml/badge.svg)
 [![Gem Version](https://badge.fury.io/rb/barley.svg)](https://badge.fury.io/rb/barley)
@@ -6,7 +6,7 @@
 
 Barley is a fast and efficient ActiveModel serializer.
 
-Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster.
+Cerealize your ActiveModel objects into flat hashes with a clear, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster.
 
 You don't believe us? Check out the [benchmarks](#benchmarks). 😎
 
@@ -469,6 +469,8 @@ ams               :    1299674 allocated - 28.20x more
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+The logo is made from an asset from [onlinewebfonts.com](https://www.onlinewebfonts.com/icon), licensed by CC BY 4.0.
 
 ## Contributing
 You can contribute in several ways: reporting bugs, suggesting features, or contributing code. See [our contributing guidelines](CONTRIBUTING.md)
