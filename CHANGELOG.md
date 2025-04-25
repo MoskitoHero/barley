@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0 (2025-04.25)
+
+### 🛠️ Chores
+  - Drop support for EOL Ruby versions < 3.2
+  - Drop support for EOL Rails versions < 7.1
+  - Update dependencies and github actions accordingly
+
 ## v0.7.0 (2024-09-25)
 
 ### ✨New features
