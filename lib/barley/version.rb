@@ -1,3 +1,3 @@
 module Barley
-  VERSION = "0.7"
+  VERSION = '0.8'
 end
