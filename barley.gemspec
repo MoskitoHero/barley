@@ -9,6 +9,7 @@ Gem::Specification.new do |spec|
   spec.description = "Cerealize your ActiveModel objects into flat hashes with a dead simple, yet versatile DSL, and caching and type-checking baked in. Our daily bread is to make your API faster."
   spec.homepage = "https://github.com/moskitohero/barley"
   spec.license = "MIT"
+  spec.required_ruby_version = ">= 3.2"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/moskitohero/barley"
@@ -19,6 +20,6 @@ Gem::Specification.new do |spec|
     Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
   end
 
-  spec.add_dependency "rails", ">= 6.1.0"
   spec.add_dependency "dry-types", "~> 1.7.1"
+  spec.add_dependency "rails", ">= 7.1.0"
 end
