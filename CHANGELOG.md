@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0 (2024-04-28)
+## 0.9.0 (2024-04-29)
 
 ### 💥 BREAKING CHANGES
 - `except` and `only` keywords introduced in 0.7.0 are now removed from `Serializer.new` arguments. They are still available on the `Model.as_json` method.
@@ -13,7 +13,7 @@
 
 ## 0.8.0 (2025-04-25)
 
-### 🛠️ Chores
+### 🛠 Chores
   - Drop support for EOL Ruby versions < 3.2
   - Drop support for EOL Rails versions < 7.1
   - Update dependencies and github actions accordingly
