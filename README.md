@@ -299,7 +299,7 @@ user = User.find(1)
 user.as_json(serializer: CustomUserSerializer, cache: { expires_in: 1.hour })
 ```
 
-Beware, this gem overrides the `as_json` method on your model. Calling `as_json` with `include`, `only`, or `except` options will not work.
+Beware, this gem overrides the `as_json` method on your model. Calling `as_json` with `include`, `only`, or `except` options will not work as expected.
 
 Why? We believe it defeats the purpose of this gem. If you want to customize the serialization of your model, you should use a serializer class.
 

@@ -18,8 +18,8 @@ module Barley
         email: @user.email,
         created_at: @user.created_at,
         updated_at: @user.updated_at,
-        groups: @user.groups.map { |g| g.as_json(serializer: UserSerializer::GroupSerializer) },
-        profile: @user.profile.as_json(serializer: UserSerializer::ProfileSerializer)
+        groups: @user.groups.map { |g| UserSerializer::GroupSerializer.new(g).serializable_hash },
+        profile: UserSerializer::ProfileSerializer.new(@user.profile).serializable_hash
       }
       assert_equal(expected, serializer.serializable_hash)
     end
@@ -356,90 +356,6 @@ module Barley
         end
       }
       assert_equal(expected, serializer.new(@user, context: context).serializable_hash)
-    end
-
-    test "serializes with only specified attributes" do
-      serializer = Class.new(Barley::Serializer) do
-        attributes :id, :email, :created_at, :updated_at
-      end
-      expected = {
-        id: @user.id,
-        email: @user.email
-      }
-      assert_equal(expected, serializer.new(@user, only: %i[id email]).serializable_hash)
-    end
-
-    test "serializes with except specified attributes" do
-      serializer = Class.new(Barley::Serializer) do
-        attributes :id, :email, :created_at, :updated_at
-      end
-      expected = {
-        id: @user.id,
-        email: @user.email,
-        created_at: @user.created_at
-      }
-      assert_equal(expected, serializer.new(@user, except: [:updated_at]).serializable_hash)
-    end
-
-    test "serializes with only and except combined" do
-      serializer = Class.new(Barley::Serializer) do
-        attributes :id, :email, :created_at, :updated_at
-      end
-      expected = {
-        id: @user.id
-      }
-      assert_equal(expected, serializer.new(@user, only: %i[id email], except: [:email]).serializable_hash)
-    end
-
-    test "serializes nested associations with only" do
-      serializer = Class.new(Barley::Serializer) do
-        attributes :id, :email
-
-        many :groups do
-          attributes :id, :name
-
-          many :users do
-            attributes :id, :email
-          end
-        end
-      end
-      expected = {
-        id: @user.id,
-        groups: @user.groups.map do |g|
-          {
-            id: g.id,
-            users: g.users.map { |u| {id: u.id} }
-          }
-        end
-      }
-      assert_equal(expected,
-        serializer.new(@user, only: [:id, {groups: [:id, {users: [:id]}]}]).serializable_hash)
-    end
-
-    test "serializes nested associations with except" do
-      serializer = Class.new(Barley::Serializer) do
-        attributes :id, :email
-
-        many :groups do
-          attributes :id, :name
-
-          many :users do
-            attributes :id, :email
-          end
-        end
-      end
-      expected = {
-        id: @user.id,
-        email: @user.email,
-        groups: @user.groups.map do |g|
-          {
-            id: g.id,
-            name: g.name,
-            users: g.users.map { |u| {id: u.id} }
-          }
-        end
-      }
-      assert_equal(expected, serializer.new(@user, except: [{groups: [{users: [:email]}]}]).serializable_hash)
     end
   end
 end

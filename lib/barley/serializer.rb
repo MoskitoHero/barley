@@ -2,8 +2,10 @@
 
 module Barley
   class Serializer
-    attr_accessor :object
-    attr_accessor :context
+    EMPTY_ARRAY = [].freeze
+    EMPTY_HASH = {}.freeze
+
+    attr_accessor :object, :context
 
     class << self
       attr_accessor :defined_attributes
@@ -81,7 +83,10 @@ module Barley
           if type.nil?
             value
           else
-            raise Barley::InvalidAttributeError, "Invalid value type found for attribute #{key_name}::#{type.name}: #{value}::#{value.class}" unless type.valid?(value)
+            unless type.valid?(value)
+              raise Barley::InvalidAttributeError,
+                    "Invalid value type found for attribute #{key_name}::#{type.name}: #{value}::#{value.class}"
+            end
 
             type[value]
           end
@@ -125,19 +130,21 @@ module Barley
       # @param block [Proc] a block to use to define the serializer inline
       def one(key, key_name: nil, serializer: nil, cache: false, &block)
         key_name ||= key
-        if block
-          serializer = Class.new(Barley::Serializer) do
+        resolved_serializer = serializer
+        resolved_serializer_from_block = nil
+        if block && !serializer
+          resolved_serializer_from_block = Class.new(Barley::Serializer) do
             instance_eval(&block)
           end
         end
+
         define_method(key_name) do
           element = object.send(key)
-          return {} if element.nil?
+          return EMPTY_HASH if element.nil?
 
-          el_serializer = serializer || element.serializer.class
-          only = @only.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @only.present?
-          except = @except.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @except.present?
-          el_serializer.new(element, cache: cache, context: @context, only: only, except: except).serializable_hash
+          el_serializer = resolved_serializer || resolved_serializer_from_block || element.serializer.class
+
+          el_serializer.new(element, cache: cache, context: @context).serializable_hash
         end
         self.defined_attributes = (defined_attributes || []) << key_name
       end
@@ -185,28 +192,47 @@ module Barley
       # @param block [Proc] a block to use to define the serializer inline
       def many(key, key_name: nil, serializer: nil, cache: false, scope: nil, &block)
         key_name ||= key
-        if block
-          serializer = Class.new(Barley::Serializer) do
+        resolved_serializer = serializer
+        resolved_serializer_from_block = nil
+        if block && !serializer
+          resolved_serializer_from_block = Class.new(Barley::Serializer) do
             instance_eval(&block)
           end
         end
+
         define_method(key_name) do
           elements = object.send(key)
-          if scope.is_a?(Symbol)
-            elements = elements.send(scope)
-          elsif scope.is_a?(Proc)
-            elements = if scope.arity == 1
-              elements.instance_exec(@context, &scope)
-            else
-              elements.instance_exec(&scope)
-            end
-          end
-          return [] if elements.empty?
+          return EMPTY_ARRAY if elements.nil? || (elements.respond_to?(:empty?) && elements.empty?)
 
-          el_serializer = serializer || elements.first.serializer.class
-          only = @only.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @only.present?
-          except = @except.find { |k| k.is_a?(Hash) && k.key?(key) }.slice(key).values.first if @except.present?
-          elements.map { |element| el_serializer.new(element, cache: cache, context: @context, only: only, except: except).serializable_hash }.reject(&:blank?)
+          if scope
+            elements = if scope.is_a?(Symbol)
+                         elements.send(scope)
+                       else
+                         (if scope.arity == 1
+                            elements.instance_exec(@context, &scope)
+                          else
+                            elements.instance_exec(&scope)
+                          end)
+                       end
+          end
+          return EMPTY_ARRAY if elements.empty?
+
+          el_serializer_class = resolved_serializer || resolved_serializer_from_block || element.serializer.class
+          serializer_instance = el_serializer_class.new(nil, cache: cache, context: @context)
+
+          result = []
+          elements.each do |element|
+            serializer_instance.object = element
+            # This assumes _serializable_hash primarily depends on @object,
+            # @context, and @effective_options (set during its own init).
+            serialized = serializer_instance.send(:_serializable_hash) # Use send for private method
+
+            next if serialized.nil? || (serialized.respond_to?(:empty?) && serialized.empty?)
+
+            result << serialized
+          end
+
+          result
         end
         self.defined_attributes = (defined_attributes || []) << key_name
       end
@@ -222,41 +248,29 @@ module Barley
     # @param cache [Boolean, Hash<Symbol, ActiveSupport::Duration>] a boolean to cache the result, or a hash with options for the cache
     # @param root [Boolean] whether to include the root key in the hash
     # @param context [Object] an optional context object to pass additional data to the serializer
-    # @param only [Array<Symbol>] an array of attributes to include
-    # @param except [Array<Symbol>] an array of attributes to exclude
-    def initialize(object, cache: false, root: false, context: nil, only: nil, except: nil)
+    def initialize(object, cache: false, root: false, context: nil)
       @object = object
       @context = context
       @root = root
-      @only = only
-      @except = except
       @cache, @expires_in = if cache.is_a?(Hash)
-        [true, cache[:expires_in]]
-      else
-        [cache, nil]
-      end
+                              [true, cache[:expires_in]]
+                            else
+                              [cache, nil]
+                            end
     end
 
     # Serializes the object
     #
     # @return [Hash] the serializable hash
     def serializable_hash
-      hash = if @cache
+      # Cache check first
+      if @cache
         Barley::Cache.fetch(cache_base_key, expires_in: @expires_in) do
           _serializable_hash
         end
       else
         _serializable_hash
       end
-      if @only.present?
-        only = @only.map { |k| k.is_a?(Hash) ? k.keys.first : k }
-        hash.slice!(*only)
-      end
-      if @except.present?
-        except = @except.reject { |k| k.is_a?(Hash) }
-        hash.except!(*except)
-      end
-      hash
     end
 
     # Clears the cache for the object
@@ -293,7 +307,7 @@ module Barley
     #
     # @return [String] the cache key
     def cache_base_key
-      if object.updated_at.present?
+      if object.respond_to?(:updated_at) && object.updated_at.present?
         "#{object.class.name&.underscore}/#{object.id}/#{object.updated_at&.to_i}/barley_cache/"
       else
         "#{object.class.name&.underscore}/#{object.id}/barley_cache/"
@@ -314,19 +328,25 @@ module Barley
     #
     # @return [Hash] the serializable hash
     def _serializable_hash
-      raise Barley::Error, "No attribute or relation defined in #{self.class}" if defined_attributes.blank?
+      attrs = defined_attributes
+      raise Barley::Error, 'No attribute or relation defined in the serializer' if attrs.nil?
 
-      hash = defined_attributes.each_with_object({}) do |key, result|
-        result[key] = send(key)
+      return @root ? { root_key => EMPTY_HASH } : EMPTY_HASH if attrs.nil? || attrs.empty?
+
+      hash = {}
+      attrs.each do |key|
+        value = send(key)
+        hash[key] = value unless value.nil?
       end
-      @root ? {root_key => hash} : hash
+
+      @root ? { root_key => hash } : hash
     end
 
     # @api private
     #
     # @return [Symbol] the root key, based on the class name
     def root_key
-      object.class.name.underscore.to_sym
+      @root_key = object_class.name.underscore.to_sym
     end
   end
 end
