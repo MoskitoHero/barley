@@ -1,11 +1,11 @@
 # Benchmark script to run varieties of JSON serializers
 # Fetch Barley from local, otherwise fetch latest from RubyGems
 
-require_relative 'prep'
+require_relative "prep"
 
 # --- Alba serializers ---
 
-require 'alba'
+require "alba"
 
 class AlbaCommentResource
   include ::Alba::Resource
@@ -23,7 +23,7 @@ end
 
 # --- ActiveModelSerializer serializers ---
 
-require 'active_model_serializers'
+require "active_model_serializers"
 
 class AMSCommentSerializer < ActiveModel::Serializer
   attributes :id, :body
@@ -41,7 +41,7 @@ end
 
 # --- Barley serializers ---
 
-require 'barley'
+require "barley"
 
 class BarleyCommentSerializer < Barley::Serializer
   attributes :id, :body
@@ -59,7 +59,7 @@ end
 
 # --- Blueprint serializers ---
 
-require 'blueprinter'
+require "blueprinter"
 
 class CommentBlueprint < Blueprinter::Base
   fields :id, :body
@@ -76,7 +76,7 @@ end
 
 # --- JBuilder serializers ---
 
-require 'jbuilder'
+require "jbuilder"
 
 class Post
   def to_builder
@@ -100,7 +100,7 @@ end
 
 # --- Jserializer serializers ---
 
-require 'jserializer'
+require "jserializer"
 
 class JserializerCommentSerializer < Jserializer::Base
   attributes :id, :body
@@ -116,7 +116,7 @@ end
 
 # --- Panko serializers ---
 
-require 'panko_serializer'
+require "panko_serializer"
 
 class PankoCommentSerializer < Panko::Serializer
   attributes :id, :body
@@ -134,7 +134,7 @@ end
 
 # --- Representable serializers ---
 
-require 'representable'
+require "representable"
 
 class CommentRepresenter < Representable::Decorator
   include Representable::JSON
@@ -158,7 +158,7 @@ end
 
 # --- SimpleAMS serializers ---
 
-require 'simple_ams'
+require "simple_ams"
 
 class SimpleAMSCommentSerializer
   include SimpleAMS::DSL
@@ -178,7 +178,7 @@ class SimpleAMSPostSerializer
   end
 end
 
-require 'turbostreamer'
+require "turbostreamer"
 TurboStreamer.set_default_encoder(:json, :oj)
 
 class TurbostreamerSerializer
@@ -203,11 +203,11 @@ end
 
 # --- Test data creation ---
 
-post = Post.create!(body: 'post')
-user1 = User.create!(name: 'John')
-user2 = User.create!(name: 'Jane')
-post.comments.create!(commenter: user1, body: 'Comment1')
-post.comments.create!(commenter: user2, body: 'Comment2')
+post = Post.create!(body: "post")
+user1 = User.create!(name: "John")
+user2 = User.create!(name: "Jane")
+post.comments.create!(commenter: user1, body: "Comment1")
+post.comments.create!(commenter: user2, body: "Comment2")
 post.reload
 
 # --- Store the serializers in procs ---
@@ -239,7 +239,7 @@ turbostreamer = proc { TurbostreamerSerializer.new(post).to_json }
 
 # --- Execute the serializers to check their output ---
 
-puts 'Serializer outputs ----------------------------------'
+puts "Serializer outputs ----------------------------------"
 {
   alba: alba,
   alba_inline: alba_inline,
@@ -255,12 +255,12 @@ puts 'Serializer outputs ----------------------------------'
   simple_ams: simple_ams,
   turbostreamer: turbostreamer
 }.each do |name, serializer|
-  puts "#{name.to_s.ljust(24, ' ')} #{serializer.call}"
+  puts "#{name.to_s.ljust(24, " ")} #{serializer.call}"
 end
 
 # --- Run the benchmarks ---
 
-require 'benchmark/ips'
+require "benchmark/ips"
 Benchmark.ips do |x|
   x.report(:alba, &alba)
   x.report(:alba_inline, &alba_inline)
@@ -279,7 +279,7 @@ Benchmark.ips do |x|
   x.compare!
 end
 
-require 'benchmark/memory'
+require "benchmark/memory"
 Benchmark.memory do |x|
   x.report(:alba, &alba)
   x.report(:alba_inline, &alba_inline)

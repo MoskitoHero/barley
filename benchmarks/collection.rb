@@ -1,11 +1,11 @@
 # Benchmark script to run varieties of JSON serializers
 # Fetch Barley from local, otherwise fetch latest from RubyGems
 
-require_relative 'prep'
+require_relative "prep"
 
 # --- Alba serializers ---
 
-require 'alba'
+require "alba"
 
 Alba.inflector = :active_support
 
@@ -35,7 +35,7 @@ end
 
 # --- ActiveModelSerializer serializers ---
 
-require 'active_model_serializers'
+require "active_model_serializers"
 
 ActiveModelSerializers.logger = Logger.new(nil)
 
@@ -55,7 +55,7 @@ end
 
 # --- Barley serializers ---
 
-require 'barley'
+require "barley"
 
 class BarleyCommentSerializer < Barley::Serializer
   attributes :id, :body
@@ -73,7 +73,7 @@ end
 
 # --- Blueprint serializers ---
 
-require 'blueprinter'
+require "blueprinter"
 
 class CommentBlueprint < Blueprinter::Base
   fields :id, :body
@@ -90,7 +90,7 @@ end
 
 # --- Fast Serializer Ruby
 
-require 'fast_serializer'
+require "fast_serializer"
 
 class FastSerializerCommentResource
   include ::FastSerializer::Schema::Mixin
@@ -111,7 +111,7 @@ end
 
 # --- Jserializer serializers ---
 
-require 'jserializer'
+require "jserializer"
 
 class JserializerCommentSerializer < Jserializer::Base
   attributes :id, :body
@@ -128,7 +128,7 @@ end
 # --- Panko serializers ---
 #
 
-require 'panko_serializer'
+require "panko_serializer"
 
 class PankoCommentSerializer < Panko::Serializer
   attributes :id, :body
@@ -146,7 +146,7 @@ end
 
 # --- Representable serializers ---
 
-require 'representable'
+require "representable"
 
 class CommentRepresenter < Representable::Decorator
   include Representable::JSON
@@ -172,7 +172,7 @@ end
 
 # --- SimpleAMS serializers ---
 
-require 'simple_ams'
+require "simple_ams"
 
 class SimpleAMSCommentSerializer
   include SimpleAMS::DSL
@@ -192,7 +192,7 @@ class SimpleAMSPostSerializer
   end
 end
 
-require 'turbostreamer'
+require "turbostreamer"
 TurboStreamer.set_default_encoder(:json, :oj)
 
 class TurbostreamerSerializer
@@ -246,7 +246,7 @@ alba_inline = proc do
     end
   end
 end
-ams = proc { ActiveModelSerializers::SerializableResource.new(posts, { each_serializer: AMSPostSerializer }).to_json }
+ams = proc { ActiveModelSerializers::SerializableResource.new(posts, {each_serializer: AMSPostSerializer}).to_json }
 barley = proc { posts.map { |post| BarleyPostSerializer.new(post).serializable_hash }.to_json }
 barley_cache = proc { posts.map { |post| BarleyPostSerializer.new(post, cache: true).serializable_hash }.to_json }
 blueprinter = proc { PostBlueprint.render(posts) }
@@ -254,14 +254,14 @@ fast_serializer = proc { FastSerializerPostResource.new(posts).to_json }
 jserializer = proc { JserializerPostSerializer.new(posts, is_collection: true).to_json }
 panko = proc { Panko::ArraySerializer.new(posts, each_serializer: PankoPostSerializer).to_json }
 rails = proc do
-  posts.to_json(include: { comments: { only: %i[id body] } }, methods: [:commenter_names])
+  posts.to_json(include: {comments: {only: %i[id body]}}, methods: [:commenter_names])
 end
 representable = proc { PostsRepresenter.new(posts).to_json }
 simple_ams = proc { SimpleAMS::Renderer::Collection.new(posts, serializer: SimpleAMSPostSerializer).to_json }
 turbostreamer = proc { TurbostreamerSerializer.new(posts).to_json }
 
 # --- Execute the serializers to check their output ---
-puts 'Checking outputs...'
+puts "Checking outputs..."
 correct = alba.call
 parsed_correct = JSON.parse(correct)
 {
@@ -304,17 +304,17 @@ benchmark_body = lambda do |x|
   x.compare!
 end
 
-require 'benchmark/ips'
+require "benchmark/ips"
 Benchmark.ips(&benchmark_body)
 
-require 'benchmark/memory'
+require "benchmark/memory"
 Benchmark.memory(&benchmark_body)
 
 # --- Show gem versions ---
 
-puts 'Gem versions:'
+puts "Gem versions:"
 gems = %w[alba active_model_serializers barley barley_cache blueprinter fast_serializer jserializer panko_serializer
-          representable simple_ams turbostreamer]
+  representable simple_ams turbostreamer]
 Bundler.load.specs.each do |spec|
   puts "#{spec.name}: #{spec.version}" if gems.include?(spec.name)
 end
