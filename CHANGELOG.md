@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.8.0 (2025-04.25)
+## 0.9.0 (2024-04-28)
+
+### 💥 BREAKING CHANGES
+- `except` and `only` keywords introduced in 0.7.0 are now removed from `Serializer.new` arguments. They are still available on the `Model.as_json` method.
+
+### 🧹 Refactoring
+- Major performance improvements, both with and without YJIT enabled. This represents an average 60% speed increase and 3 times smaller memory footprint.
+
+### 🛠️ Chores
+- Updated the link to benchmarks
+
+## 0.8.0 (2025-04-25)
 
 ### 🛠️ Chores
   - Drop support for EOL Ruby versions < 3.2
